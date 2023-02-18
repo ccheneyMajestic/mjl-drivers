@@ -5,6 +5,8 @@
 *.html
 *.xml
 *.log
+*.svd
 
 codegentemp/
 Generated_Source/
+CortexM0/
