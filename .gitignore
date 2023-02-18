@@ -1,0 +1,10 @@
+*.cchen
+*.cycdx
+*.cyfit
+*.rpt
+*.html
+*.xml
+*.log
+
+codegentemp/
+Generated_Source/
