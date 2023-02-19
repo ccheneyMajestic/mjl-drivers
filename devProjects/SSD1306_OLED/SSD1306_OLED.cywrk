@@ -8,6 +8,7 @@
 <files />
 <projects>
 <v>.\01_Dev.cydsn\01_Dev.cyprj</v>
+<v>.\00_psoc4-template.cydsn\00_psoc4-template.cyprj</v>
 </projects>
 <workspace_id v="f9b7cbc1-1c7a-46b8-b2a6-9a3ffd180991" />
 <WriteAppVersionLastSavedWith v="4.4.0.80" />
