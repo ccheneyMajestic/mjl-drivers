@@ -20,9 +20,45 @@
   ***************************************/
   #include <stdint.h>
   #include <stdbool.h>
+  #include <stddef.h>
   /***************************************
   * Macro Definitions
   ***************************************/
+  #define SSD1306_RESET_DISASSERT             (1) /* Deassert the reset pin */
+  #define SSD1306_RESET_ASSERT                (0) /* Assert the reset pin */
+  #define SSD1306_PAGE_HEIGHT                 (8) /* Pixels per page */
+  #define SSD1306_NUM_PAGE                    (8)  /* Number of pages in the display */
+  #define SSD1306_NUM_COLS                    (128)  /* Number of cols in the display */
+  #define SSD1306_NUM_ROWS                    (64)  /* Number of Rows in the display */
+  #define SSD1306_DC_DATA                     (1) /* Write data */
+  #define SSD1306_DC_COMMAND                  (0) /* Write command */
+  #define SSD1306_DC_DATA                     (1) /* Write data */
+  #define SSD1306_DC_COMMAND                  (0) /* Write command */
+
+  #define SSD1306_CMD_ALL_ON                  (0xA5) /* Command to turn all LEDs on */
+  #define SSD1306_CMD_ALL_RAM                 (0xA4) /* Command to turn all LEDs to match what's in RAM */
+  #define SSD1306_CMD_CHARGE_PUMP             (0x8D) /* Command to address the charge pump */
+  #define SSD1306_CMD_CHARGE_PUMP_ON          (0x14) /* Enable Charge pump */
+  #define SSD1306_CMD_CHARGE_PUMP_OFF         (0x10) /* Disable Charge pump */
+  #define SSD1306_CMD_ON                      (0xAF) /* Enable the Display (wakeup) */
+  #define SSD1306_CMD_SLEEP                   (0xAE) /* Disable the Display (sleep) */
+
+  #define SSD1306_CMD_ADDRESS_MODE            (0x20) /* Set the addressing mode */
+  #define SSD1306_CMD_ADDRESS_MODE_HORIZONTAL (0x00) /* Horizontal Addressing mode */
+  #define SSD1306_CMD_ADDRESS_MODE_VERTICAL   (0x01) /* Vertical Addressing mode */
+  #define SSD1306_CMD_ADDRESS_MODE_PAGE       (0x02) /* Page Addressing mode (default) */
+
+  #define SSD1306_CMD_COLUMN_ADDR             (0x21) /* Set the column address */
+  #define SSD1306_CMD_PAGE_ADDR               (0x22) /* Set the page address */
+
+
+
+  #define DISPLAY_LEN_16x32                   (64)
+
+
+  #define SPI_ID_OLED             (0) /* Slave ID of the OLED */
+
+  
 
   /***************************************
   * Enumerated Types
@@ -33,21 +69,42 @@
     SSD1306_STATE_ON,
   } ssd1306_state_t;
 
-  /* Transition causes */
-  typedef enum {
-      SSD1306_TRANSITION_NONE,
-      SSD1306_TRANSITION_CMD,
-  } ssd1306_state_transition_t;
   
   /***************************************
   * Structures
   ***************************************/
+
+
+  /* Control the display window */
+  typedef struct {
+      uint8_t pageStart;
+      uint8_t pageEnd;
+      uint8_t colStart;
+      uint8_t colEnd;  
+  } display_window_s;
+
+  typedef struct {
+      uint8_t origin_col;
+      uint8_t origin_row;
+      uint8_t size_cols;
+      uint8_t size_rows;
+      uint8_t repeat_num;
+      uint8_t repeat_spacing;
+  } display_position_s;
+
+
   /* Object Configuration Structure */
   typedef struct{
     /* HAL Function Pointers */
-    uint32_t (*fn_getTime_ms) (void);
+    uint32_t (*fn_spi_writeArrayBlocking) (uint8_t slaveId, const uint8_t * cmdArray, uint16_t len);
+    void (*fn_pin_reset_write) (uint8_t val);
+    void (*fn_pin_dataCommand_write) (uint8_t val);
+    void (*fn_delayMs)(uint32_t milliseconds);
+    display_window_s fullWindow;
+    uint8_t spi_slaveId;
     /* Object function pointer */
   } ssd1306_cfg_s;
+
 
   /* Object State Structure */
   typedef struct {
@@ -57,7 +114,12 @@
     uint32_t output;
     uint32_t error;
     /* Input parameters */
-    uint32_t (*fn_getTime_ms) (void);
+    uint32_t (*fn_spi_writeArrayBlocking) (uint8_t slaveId, const uint8_t * cmdArray, uint16_t len);
+    void (*fn_pin_reset_write) (uint8_t val);
+    void (*fn_pin_dataCommand_write) (uint8_t val);
+    void (*fn_delayMs)(uint32_t milliseconds);
+    display_window_s fullWindow;
+    uint8_t spi_slaveId;
     /* Nested objects */
 
     /* State variables */
@@ -67,22 +129,35 @@
     ssd1306_state_t state_previous;
     ssd1306_state_t state_requested;
     /* Flags and status */
-    bool flag_isStateTransitionRequested;
-    bool flag_didStateTransitionOccur;
-    ssd1306_state_transition_t stateTransitionCause;
-    uint32_t status_timeLastUpdated; 
-    /* Actuator Values */
-
-    /* Sensor values */
-
   } ssd1306_state_s;
-  
+
+  /***************************************
+  * External variables
+  ***************************************/
+
   /***************************************
   * Function declarations 
   ***************************************/
   /* Required Functions */
-  uint32_t ssd1306_start(ssd1306_state_s *const state, ssd1306_cfg_s *const cfg);
-  uint32_t ssd1306_stop(ssd1306_state_s *const state);
+  uint32_t SSD1306_init(ssd1306_state_s *const state, ssd1306_cfg_s *const cfg);
+  uint32_t SSD1306_start(ssd1306_state_s *const state);
+  uint32_t SSD1306_writeCommandArray(ssd1306_state_s *const state, uint8_t * cmdArray, uint8_t len);
+  uint32_t SSD1306_writeDataArray(ssd1306_state_s *const state, const uint8_t * dataArray, uint16_t len);
+  uint32_t SSD1306_setWindow(ssd1306_state_s *const state, display_window_s *const window);
+  uint32_t SSD1306_clearScreen(ssd1306_state_s *const state);
+  uint32_t SSD1306_drawDigit_8x16(ssd1306_state_s *const state, uint8_t num);
+  uint32_t SSD1306_setDigits(ssd1306_state_s *const state, uint8_t* digits, display_position_s *const pos);
+  uint32_t SSD1306_setDigits_16x32(ssd1306_state_s *const state, uint8_t *digits, display_position_s *const pos);
+  uint32_t SSD1306_setLetters(ssd1306_state_s *const state, const uint8_t **letters, display_position_s *const pos);
+
+
+
+  uint32_t windowFromPos(display_position_s *const pos, uint8_t instanceNum, display_window_s *const window);
+  uint32_t create16x32(const uint8_t * inObject, uint8_t * outObject);
+  uint32_t tokenizeNumber(uint16_t val, uint8_t *outArray);
+
+
+
 
   /* Actions */
 

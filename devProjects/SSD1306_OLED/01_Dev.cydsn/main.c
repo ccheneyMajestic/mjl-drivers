@@ -52,6 +52,11 @@
 #define SSD1306_RESET_DISASSERT (1) /* Deassert the reset pin */
 #define SSD1306_RESET_ASSERT    (0) /* Assert the reset pin */
 #define SSD1306_PAGE_HEIGHT     (8) /* Pixels per page */
+#define SSD1306_NUM_PAGE        (8)  /* Number of pages in the display */
+#define SSD1306_NUM_COLS        (128)  /* Number of cols in the display */
+#define SSD1306_NUM_ROWS        (64)  /* Number of Rows in the display */
+
+
 
 #define SSD1306_DC_DATA         (1) /* Write data */
 #define SSD1306_DC_COMMAND      (0) /* Write command */
@@ -75,22 +80,25 @@
 #define UI_ICON_BATTERY_LEN             (16) /* number of bytes in the battery icon */
 #define UI_ICON_HISTORY_LEN             (48) /* number of bytes in the history icon */
 #define UI_ICON_RESET_LEN               (48) /* number of bytes in the rest icon */
+#define UI_TEXT_8x16_LEN                     (16) /* Number of byte in an 8x16 character */
 
 #define DISPLAY_LEN_16x32  (64)
 
 
 
+
+
 /* Bitmaps for digits 0-9 */
-const uint8_t zero_8x16[16]     = {0xFE, 0xFE, 0x03, 0x03, 0x03, 0x03, 0xFE, 0xFE, 0x7F, 0x7F, 0xC0, 0xC0, 0xC0, 0xC0, 0x7F, 0x7F};
-const uint8_t one_8x16[16]      = {0x00, 0x10, 0x1C, 0xFF, 0xFF, 0x00, 0x00, 0x00, 0xC0, 0xC0, 0xC0, 0xFF, 0xFF, 0xC0, 0xC0, 0xC0};
-const uint8_t two_8x16[16]      = {0x1C, 0x9E, 0x83, 0x83, 0x83, 0xFF, 0xFE, 0x00, 0xFF, 0xFF, 0xC1, 0xC1, 0xC1, 0xC1, 0xC0, 0x00};
-const uint8_t three_8x16[16]    = {0x1E, 0x1F, 0x03, 0xC3, 0xC3, 0xFF, 0x7E, 0x00, 0x78, 0xF8, 0xC0, 0xC1, 0xC1, 0xFF, 0x7F, 0x00};
-const uint8_t four_8x16[16]     = {0x80, 0xE0, 0xF8, 0x9C, 0x8E, 0xFF, 0xFF, 0x80, 0x01, 0x01, 0x01, 0x01, 0x01, 0xFF, 0xFF, 0x01};
-const uint8_t five_8x16[16]     = {0x7F, 0xFF, 0xC3, 0xC3, 0xC3, 0xC3, 0x83, 0x00, 0x78, 0xF8, 0xC0, 0xC0, 0xC0, 0xFF, 0x7F, 0x00};
-const uint8_t six_8x16[16]      = {0xFC, 0xFE, 0x87, 0x83, 0x83, 0x9F, 0x9E, 0x00, 0x3F, 0xFF, 0xC1, 0xC1, 0xC1, 0xFF, 0x7F, 0x00};
-const uint8_t seven_8x16[16]    = {0x03, 0x03, 0x03, 0x83, 0xE3, 0xFF, 0x3F, 0x07, 0x00, 0xC0, 0xF8, 0xFF, 0x0F, 0x01, 0x00, 0x00};
-const uint8_t eight_8x16[16]    = {0x3E, 0xFE, 0xC3, 0xC3, 0xC3, 0xC3, 0xFE, 0x3E, 0x3F, 0x7F, 0xC0, 0xC0, 0xC0, 0xC0, 0x7F, 0x3F};
-const uint8_t nine_8x16[16]     = {0x7C, 0xFE, 0x83, 0x83, 0x83, 0x83, 0xFE, 0xFC, 0x38, 0x78, 0xE1, 0xC1, 0xC1, 0xC1, 0xFF, 0x7F};
+const uint8_t zero_8x16[UI_TEXT_8x16_LEN]     = {0xFE, 0xFE, 0x03, 0x03, 0x03, 0x03, 0xFE, 0xFE, 0x7F, 0x7F, 0xC0, 0xC0, 0xC0, 0xC0, 0x7F, 0x7F};
+const uint8_t one_8x16[UI_TEXT_8x16_LEN]      = {0x00, 0x10, 0x1C, 0xFF, 0xFF, 0x00, 0x00, 0x00, 0xC0, 0xC0, 0xC0, 0xFF, 0xFF, 0xC0, 0xC0, 0xC0};
+const uint8_t two_8x16[UI_TEXT_8x16_LEN]      = {0x1C, 0x9E, 0x83, 0x83, 0x83, 0xFF, 0xFE, 0x00, 0xFF, 0xFF, 0xC1, 0xC1, 0xC1, 0xC1, 0xC0, 0x00};
+const uint8_t three_8x16[UI_TEXT_8x16_LEN]    = {0x1E, 0x1F, 0x03, 0xC3, 0xC3, 0xFF, 0x7E, 0x00, 0x78, 0xF8, 0xC0, 0xC1, 0xC1, 0xFF, 0x7F, 0x00};
+const uint8_t four_8x16[UI_TEXT_8x16_LEN]     = {0x80, 0xE0, 0xF8, 0x9C, 0x8E, 0xFF, 0xFF, 0x80, 0x01, 0x01, 0x01, 0x01, 0x01, 0xFF, 0xFF, 0x01};
+const uint8_t five_8x16[UI_TEXT_8x16_LEN]     = {0x7F, 0xFF, 0xC3, 0xC3, 0xC3, 0xC3, 0x83, 0x00, 0x78, 0xF8, 0xC0, 0xC0, 0xC0, 0xFF, 0x7F, 0x00};
+const uint8_t six_8x16[UI_TEXT_8x16_LEN]      = {0xFC, 0xFE, 0x87, 0x83, 0x83, 0x9F, 0x9E, 0x00, 0x3F, 0xFF, 0xC1, 0xC1, 0xC1, 0xFF, 0x7F, 0x00};
+const uint8_t seven_8x16[UI_TEXT_8x16_LEN]    = {0x03, 0x03, 0x03, 0x83, 0xE3, 0xFF, 0x3F, 0x07, 0x00, 0xC0, 0xF8, 0xFF, 0x0F, 0x01, 0x00, 0x00};
+const uint8_t eight_8x16[UI_TEXT_8x16_LEN]    = {0x3E, 0xFE, 0xC3, 0xC3, 0xC3, 0xC3, 0xFE, 0x3E, 0x3F, 0x7F, 0xC0, 0xC0, 0xC0, 0xC0, 0x7F, 0x3F};
+const uint8_t nine_8x16[UI_TEXT_8x16_LEN]     = {0x7C, 0xFE, 0x83, 0x83, 0x83, 0x83, 0xFE, 0xFC, 0x38, 0x78, 0xE1, 0xC1, 0xC1, 0xC1, 0xFF, 0x7F};
 const uint8_t* digits_8x16[10]  = {zero_8x16, one_8x16, two_8x16, three_8x16, four_8x16, five_8x16, six_8x16, seven_8x16, eight_8x16, nine_8x16};
 /* Icon bitmaps */
 const uint8_t batteryOutline[UI_ICON_BATTERY_LEN]= {0x3C, 0xFF, 0x81, 0x81, 0x81, 0x81, 0x81, 0x81, 0x81, 0x81, 0x81, 0x81, 0x81, 0x81, 0x81, 0xFF};
@@ -103,12 +111,12 @@ const uint8_t resetOutline[UI_ICON_RESET_LEN]  = {0x00, 0x00, 0x80, 0xE0, 0x30, 
                                    0x04, 0x0C, 0x1F, 0x0C, 0x04, 0x00, 0x20, 0x30, 0x18, 0x0F, 0x00, 0x00, 0x00, 0x00, 0x81, 0xFF, 
                                    0xC0, 0xC0, 0xC0, 0xC6, 0xCC, 0xD8, 0xD8, 0xD8, 0xD8, 0xD8, 0xD8, 0xD8, 0xCC, 0xC6, 0xC3, 0xC0};
 /* Text bitmaps */
-const uint8_t M_8x16[16]        = {0xFF, 0xF8, 0xE0, 0x00, 0x00, 0xE0, 0xF8, 0xFF, 0xFF, 0x00, 0x01, 0x0F, 0x0F, 0x01, 0x00, 0xFF};
-const uint8_t A_8x16[16]        = {0x00, 0xE0, 0x7C, 0x1F, 0x1F, 0x7C, 0xE0, 0x00, 0xFC, 0x1F, 0x18, 0x18, 0x18, 0x18, 0x1F, 0xFC};
-const uint8_t X_8x16[16]        = {0x01, 0x07, 0x3C, 0xF0, 0xF0, 0x3C, 0x07, 0x01, 0x80, 0xE0, 0x3C, 0x0F, 0x0F, 0x3C, 0xE0, 0x80};
+const uint8_t M_8x16[UI_TEXT_8x16_LEN]        = {0xFF, 0xF8, 0xE0, 0x00, 0x00, 0xE0, 0xF8, 0xFF, 0xFF, 0x00, 0x01, 0x0F, 0x0F, 0x01, 0x00, 0xFF};
+const uint8_t A_8x16[UI_TEXT_8x16_LEN]        = {0x00, 0xE0, 0x7C, 0x1F, 0x1F, 0x7C, 0xE0, 0x00, 0xFC, 0x1F, 0x18, 0x18, 0x18, 0x18, 0x1F, 0xFC};
+const uint8_t X_8x16[UI_TEXT_8x16_LEN]        = {0x01, 0x07, 0x3C, 0xF0, 0xF0, 0x3C, 0x07, 0x01, 0x80, 0xE0, 0x3C, 0x0F, 0x0F, 0x3C, 0xE0, 0x80};
 const uint8_t* maxText_bitmaps[3]       = {M_8x16, A_8x16, X_8x16};
-const uint8_t K_8x16[16]        = {0xFF, 0xFF, 0xC0, 0xC0, 0xF8, 0xFE, 0x07, 0x01, 0xFF, 0xFF, 0x03, 0x01, 0x01, 0x3F, 0xFE, 0xF0};
-const uint8_t G_8x16[16]        = {0xFC, 0xFF, 0x01, 0x01, 0x01, 0x83, 0x8F, 0x8E, 0x3F, 0x7F, 0xC0, 0x80, 0x80, 0x81, 0xFF, 0x7F};
+const uint8_t K_8x16[UI_TEXT_8x16_LEN]        = {0xFF, 0xFF, 0xC0, 0xC0, 0xF8, 0xFE, 0x07, 0x01, 0xFF, 0xFF, 0x03, 0x01, 0x01, 0x3F, 0xFE, 0xF0};
+const uint8_t G_8x16[UI_TEXT_8x16_LEN]        = {0xFC, 0xFF, 0x01, 0x01, 0x01, 0x83, 0x8F, 0x8E, 0x3F, 0x7F, 0xC0, 0x80, 0x80, 0x81, 0xFF, 0x7F};
 const uint8_t* kgText_bitmaps[2] = {K_8x16, G_8x16};
 
 
@@ -164,6 +172,7 @@ display_position_s historyIcon;
 display_position_s resetIcon;
 display_position_s unitLetters;
 
+display_window_s fullWindow;
 
 
 
@@ -408,7 +417,7 @@ int main(void){
                     CySoftwareReset();  
                 }
                 else if ('0' == readVal) {
-                    printLn(&usb, "Blank screen", count);
+                    printLn(&usb, "Blank screen");
                     SSD1306_clearScreen();
                 }
                 else if (' ' == readVal) {
@@ -438,6 +447,7 @@ int main(void){
         uint16_t loopCount = 0;
         
         /**** Drawing ****/
+        SSD1306_clearScreen();
         /* Battery Icon */
         SSD1306_windowFromPos(&batteryIcon,0,&activeWindowBuffer);
         SSD1306_setWindow(&activeWindowBuffer);
@@ -473,6 +483,10 @@ int main(void){
                     print(&usb, "\r\nResetting...");
                     CyDelay(1000);
                     CySoftwareReset();  
+                }
+                else if ('0' == readVal) {
+                    printLn(&usb, "Blank screen");
+                    SSD1306_clearScreen();
                 }
                 else if (' ' == readVal) {
                     forceVal += (loopCount & 0xFF) >> 2;
@@ -581,6 +595,11 @@ uint32_t initHardware(void) {
     unitLetters.size_rows=16;
     unitLetters.repeat_num=2;
     unitLetters.repeat_spacing=1;
+    
+    fullWindow.colStart = 0;
+    fullWindow.colEnd = 127;
+    fullWindow.pageStart = 0;
+    fullWindow.pageEnd = 7;
 
     
     return error;
@@ -669,12 +688,12 @@ uint32_t SSD1306_writeDataArray(const uint8_t * dataArray, uint16_t len) {
 *******************************************************************************/
 uint32_t SSD1306_setWindow(display_window_s *const window) {
     uint32_t error = 0;
-    
-    uint8_t dataArray[6] = {
+    #define WINDOW_BUFFER_LEN 6
+    uint8_t dataArray[WINDOW_BUFFER_LEN] = {
         SSD1306_CMD_COLUMN_ADDR, window->colStart, window->colEnd,
         SSD1306_CMD_PAGE_ADDR, window->pageStart, window->pageEnd
     };
-    SSD1306_writeCommandArray(dataArray, 6);
+    SSD1306_writeCommandArray(dataArray, WINDOW_BUFFER_LEN);
     return error;
 }
 
@@ -733,7 +752,7 @@ uint32_t SSD1306_drawDigit_8x16(uint8_t num){
         error = COMMS_ERROR_VAL;
     }
     if(!error) {
-        SSD1306_writeDataArray((uint8_t *)digits_8x16[num], 16);
+        SSD1306_writeDataArray(digits_8x16[num], UI_TEXT_8x16_LEN);
     }
     return error;
 }
@@ -749,27 +768,19 @@ uint32_t SSD1306_drawDigit_8x16(uint8_t num){
 *******************************************************************************/
 uint32_t SSD1306_clearScreen(){
     uint32_t error = 0;
-    
-    display_window_s fullWindow;
-    fullWindow.colStart = 0;
-    fullWindow.colEnd = 127;
-    fullWindow.pageStart = 0;
-    fullWindow.pageEnd = 7;
+    /* Make an empty page */
+    uint8_t blankPage[SSD1306_NUM_COLS];
+    memset(blankPage,0,SSD1306_NUM_COLS);
     SSD1306_setWindow(&fullWindow);
-    
-    uint8_t blankPage[128];
-    memset(blankPage,0,128);
-    
-    
     uint8_t i;
-    for(i=0; i < 8; i++){
-        error|= SSD1306_writeDataArray(blankPage,128);
+    /* Write all the pages */
+    for(i=0; i < SSD1306_NUM_PAGE; i++){
+        error|= SSD1306_writeDataArray(blankPage,SSD1306_NUM_COLS);
         if(error){
             printLn(&usb, "Clear error %i",error);
             break;
         }
     }
-    
     return error;
 }
 
@@ -807,9 +818,7 @@ uint32_t SSD1306_setDigits(uint8_t *digits, display_position_s *const pos){
             }
             /* Render last 0 */
             else if(i == pos->repeat_num -1){}
-            else {
-                continue;
-            }
+            else {continue;}
             /* Calculate the window */
             display_window_s window;
             SSD1306_windowFromPos(pos, i, &window);
@@ -902,7 +911,7 @@ uint32_t SSD1306_setLetters(const uint8_t **letters, display_position_s *const p
             SSD1306_windowFromPos(pos, i, &window);
             SSD1306_setWindow(&window); 
             /* draw the digit */
-            SSD1306_writeDataArray(letters[i], 16); 
+            SSD1306_writeDataArray(letters[i], UI_TEXT_8x16_LEN); 
         }
     }
     return error;
@@ -935,7 +944,7 @@ uint32_t SSD1306_create16x32(const uint8_t * inObject, uint8_t * outObject){
         uint8_t bitIndex;
         uint8_t newHighByte = 0;
         uint8_t newLowByte = 0;
-        
+        /* Iterate through each bit in the nibble*/
         for(bitIndex=0; bitIndex<4; bitIndex++){
             /* High byte */
             bool bit = (highNibble >> bitIndex) & 0x01;
@@ -950,10 +959,11 @@ uint32_t SSD1306_create16x32(const uint8_t * inObject, uint8_t * outObject){
                 newLowByte |= (0b11 << (bitIndex *2));
             }
         }  
+        // TODO: refactor these out
         #define INOBJECT_NUM_COLS 8
         #define OUTOBJECT_NUM_COLS 16
         /* Calculate Indices */
-        uint8_t l1 = dataIndex*2 +OUTOBJECT_NUM_COLS*((dataIndex/INOBJECT_NUM_COLS));
+        uint8_t l1 = dataIndex*2 +OUTOBJECT_NUM_COLS*(dataIndex/INOBJECT_NUM_COLS);
         uint8_t l2 = l1 +1;
         uint8_t h1 = dataIndex*2+ OUTOBJECT_NUM_COLS*((dataIndex/INOBJECT_NUM_COLS)+1);
         uint8_t h2 = h1+1;
@@ -993,22 +1003,31 @@ uint32_t spi_writeArrayBlocking(uint8_t slaveId, const uint8_t * cmdArray, uint1
         while(false == isRoomInBuffer){
             isRoomInBuffer = SPIM_STS_TX_FIFO_NOT_FULL & SPIM_ReadTxStatus();
             if(++count == 0){
-                printLn(&usb, "SPI TX Buffer Timeout");
+                printLn(&usb, "SPI 'Load TX Buffer' Timeout");
+                error = 1;
                 break;
             }    
         }
-        SPIM_WriteTxData(cmdArray[i]);   
-    }
-    /* Wait for the write buffer to complete */
-    bool isSpiDone = false;
-    count = 0;
-    while(false == isSpiDone){
-        isSpiDone = SPIM_STS_SPI_DONE & SPIM_ReadTxStatus();
-        if(++count == 0){
-            printLn(&usb, "SPI Done Timeout");
+        /* Exit on error */
+        if(error){
             break;
-        }    
-    }   
+        }
+        /* Add TX data to SPI Buffer */
+        SPIM_WriteTxData(cmdArray[i]);  
+    }
+    if(!error){
+        /* Wait for the write buffer to complete */
+        bool isSpiDone = false;
+        count = 0;
+        while(false == isSpiDone){
+            isSpiDone = SPIM_STS_SPI_DONE & SPIM_ReadTxStatus();
+            if(++count == 0){
+                error=2;
+                printLn(&usb, "SPI 'Done' Timeout");
+                break;
+            }    
+        }   
+    }
     return error;
 }
 
