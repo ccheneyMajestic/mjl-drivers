@@ -20,7 +20,6 @@
 #include "RGB.h"
 #include "uartApi.h"
 #include "PSoC_serial.h"
-#include "PSoC_SPI.h"
 #include "OLED_SSD1306.h"
 #include "mjl_font.h"
 
@@ -35,10 +34,11 @@
 #ifdef MJL_DEBUG
 //    #define MJL_DEBUG_LEDS           /* Test the onboard RGB LED */
 //    #define MJL_DEBUG_UART           /* Test the UART Connection */
-//    #define MJL_DEBUG_SCREEN_START      /* Start the screen */ 
-    #define MJL_DEBUG_SCREEN           /* Turn the entire screen on */
+    #define MJL_DEBUG_SCREEN_START      /* Start the screen */ 
+//    #define MJL_DEBUG_SCREEN           /* Turn the entire screen on */
+//    #define MJL_DEBUG_SCREEN_NO_UART           /* Turn the entire screen on */
 //    #define MJL_DEBUG_DRAW_UI          /* Draw the UI */
-#endif 
+#endif
 /* -------------- END DEBUG CASE --------------  */
    
 
@@ -47,9 +47,21 @@
 #define DELAY 500
 #define LEN_ROW 128
 
+#define SL_SPI_ID_DISPLAY   (0) /* SPI Slave ID of the Display */
+#define SL_SPI_ID_INA       (1) /* SPI Slave ID of the Instrumentation Amp */
+#define SL_SPI_ID_FLASH     (2) /* SPI Slave ID of the Flash */
+#define SPI_CS_ACTIVE       (0) /* Value to assert an active slave) */
+#define SPI_CS_INACTIVE     (1) /* Value to disassert a slave) */
+#define ERROR_SHIFT_VAL 1
+#define ERROR_TIMEOUT 2
+
 /* Function declarations */ 
 uint32_t initHardware(void); 
-uint32_t spi_writeArrayBlocking(uint8_t slaveId, const uint8_t * cmdArray, uint16_t len);
+uint32_t spi_scbWriteArrayBlocking(uint8_t slaveId, uint8_t * cmdArray, uint16_t len);
+uint32_t spi_assertSlave(uint8_t slaveId);
+void spi_disassertSlave(void);
+void pin_oled_reset_write_dummy(uint8_t val);
+
 /* Global Variables */
 RGB_S rgb;
 COMMS_UART_S usb;
@@ -182,6 +194,7 @@ int main(void){
         uint32_t error = SSD1306_start(&display);
         printErrorStatus(&usb, "Start display", error, 0);
 
+        bool isDisplayDataShown = true;
         for(;;) {
             /* Handle UART */
             uint8_t readVal = 0;
@@ -194,6 +207,20 @@ int main(void){
                     CySoftwareReset();  
                 }
             }
+            /* Toggle between all on and all off */
+            CyDelay(1000);
+            RGB_B_Toggle(&rgb);
+            isDisplayDataShown = !isDisplayDataShown;
+            uint8_t cmdWord = 0;
+            if(isDisplayDataShown){
+                printLn(&usb, "Display data shown");
+                cmdWord = SSD1306_CMD_ALL_RAM;
+            }
+            else {
+                printLn(&usb, "Display all on");
+                cmdWord = SSD1306_CMD_ALL_ON;
+            }
+            SSD1306_writeCommandArray(&display, &cmdWord, 1);
         }
     /* End MJL_DEBUG_SCREEN_START */    
     #elif defined MJL_DEBUG_SCREEN           
@@ -265,6 +292,18 @@ int main(void){
             }
         }
     /* End MJL_DEBUG_SCREEN_ON */
+    #elif defined MJL_DEBUG_SCREEN_NO_UART           
+        /* Turn the entire screen on */
+        RGB_Write(&rgb, RGB_Blue);
+        uint32_t error = SSD1306_clearScreen(&display);
+        if(error){
+            RGB_Write(&rgb, RGB_Green);
+        }
+            
+        
+        for(;;){
+            
+        }
     #elif defined MJL_DEBUG_DRAW_UI          
         /* Draw the UI */
         printHeader(&usb, "MJL_DEBUG_DRAW_UI");
@@ -368,11 +407,12 @@ uint32_t initHardware(void) {
     /* Start the UART */
     error |= uartPsoc_start(&usb, 115200);
     /* Start the SPI component */
-    error |= spiPsoc_start(&spi);
+    SPI_Start();
+//    error |= spiPsoc_start(&spi);
     /* start the OLED */
     ssd1306_cfg_s display_cfg;
-    display_cfg.fn_spi_writeArrayBlocking = spi_writeArrayBlocking;
-    display_cfg.fn_pin_reset_write = pin_OLED_RESET_Write;
+    display_cfg.fn_spi_writeArrayBlocking = spi_scbWriteArrayBlocking;
+    display_cfg.fn_pin_reset_write = pin_oled_reset_write_dummy;
     display_cfg.fn_pin_dataCommand_write = pin_OLED_DC_Write;
     display_cfg.fn_delayMs = CyDelay;
     display_cfg.fullWindow.colStart = 0;
@@ -445,53 +485,108 @@ uint32_t initHardware(void) {
 
 
 /*******************************************************************************
-* Function Name: spi_writeArrayBlocking()
+* Function Name: spi_scbWriteArrayBlocking()
 ********************************************************************************
 * \brief
-*   Write an array of data via SPI 
+*   Write an array of data via SPI using the SCB api. This is a blocking function
 *
 * \return
 *  Error code of the operation
 *******************************************************************************/
-uint32_t spi_writeArrayBlocking(uint8_t slaveId, const uint8_t * cmdArray, uint16_t len) {
+uint32_t spi_scbWriteArrayBlocking(uint8_t slaveId, uint8_t * cmdArray, uint16_t len) {
     uint32_t error = 0;
-    spiSlaveSelect_Write(slaveId);
-    uint8_t i;
-    uint16_t count = 0;
+    /* Bit bang CS line */
+    error |= spi_assertSlave(slaveId);
     /* Place the array into the TX buffer */
-    for(i=0; i<len; i++){
-        /* Ensure room in the TX buffer */
-        bool isRoomInBuffer = false;
-        count = 0;
-        while(false == isRoomInBuffer){
-            isRoomInBuffer = SPIM_STS_TX_FIFO_NOT_FULL & SPIM_ReadTxStatus();
-            if(++count == 0){
-                // printLn(&usb, "SPI 'Load TX Buffer' Timeout");
-                error = 1;
-                break;
-            }    
-        }
-        /* Exit on error */
-        if(error){
-            break;
-        }
-        /* Add TX data to SPI Buffer */
-        SPIM_WriteTxData(cmdArray[i]);  
-    }
+    SPI_SpiUartPutArray(cmdArray, len);
     if(!error){
         /* Wait for the write buffer to complete */
-        bool isSpiDone = false;
-        count = 0;
-        while(false == isSpiDone){
-            isSpiDone = SPIM_STS_SPI_DONE & SPIM_ReadTxStatus();
+        uint16_t count = 0;
+        /* Wait until data has been shifted in */
+        while(!SPI_SpiIsBusBusy()){
             if(++count == 0){
-                error=2;
+                error=ERROR_TIMEOUT;
                 // printLn(&usb, "SPI 'Done' Timeout");
                 break;
             }    
-        }   
+        }
+        /* Wait until data has been shifted out */
+        if(!error){
+            count = 0;
+            while(SPI_SpiIsBusBusy()){
+                if(++count == 0){
+                    error=ERROR_TIMEOUT;
+                    // printLn(&usb, "SPI 'Done' Timeout");
+                    break;
+                }    
+            }   
+        }
+    }
+    /* Bit bang CS line */
+    spi_disassertSlave();
+    
+    return error;
+}
+
+/*******************************************************************************
+* Function Name: spi_assertSlave()
+********************************************************************************
+* \brief
+*  Bit banged - Set the active slave for the SPI
+*
+* \return
+*  None
+*******************************************************************************/
+uint32_t spi_assertSlave(uint8_t slaveId){
+    uint32_t error = 0;
+    /* OLED Display */
+    if(slaveId == SL_SPI_ID_DISPLAY){
+        pin_SPI_CS_DISP_Write(SPI_CS_ACTIVE);   
+    }
+    /* Instrumentation Amp */
+    else if (slaveId == SL_SPI_ID_INA) {
+        pin_SPI_CS_INA_Write(SPI_CS_ACTIVE);   
+    }
+    /* Flash Memory */
+    else if (slaveId == SL_SPI_ID_FLASH) {
+        pin_SPI_CS_FLASH_Write(SPI_CS_ACTIVE);   
+    }
+    /* Invalid ID */
+    else{
+        error |= ERROR_SHIFT_VAL;   
     }
     return error;
+}
+
+
+/*******************************************************************************
+* Function Name: spi_disassertSlave()
+********************************************************************************
+* \brief
+*  Bit banged - Remove the active slave
+*
+* \return
+*  None
+*******************************************************************************/
+void spi_disassertSlave(void){
+    pin_SPI_CS_DISP_Write(SPI_CS_INACTIVE);
+    pin_SPI_CS_INA_Write(SPI_CS_INACTIVE);
+    pin_SPI_CS_FLASH_Write(SPI_CS_INACTIVE);
+}
+
+
+
+/*******************************************************************************
+* Function Name: pin_oled_reset_write_dummy()
+********************************************************************************
+* \brief
+*   Stand in for controlling the reset pin,as it is tied to the AUX_EN pin 
+*
+* \return
+*  None
+*******************************************************************************/
+void pin_oled_reset_write_dummy(uint8_t val){
+    (void) val;
 }
 
 /* [] END OF FILE */

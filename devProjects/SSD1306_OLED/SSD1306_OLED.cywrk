@@ -3,13 +3,14 @@
 <!--This file is machine generated and read. It is not intended to be edited by hand.-->
 <!--Due to this, there is no schema for this file.-->
 <CyGuid_2867d519-54d2-4c01-9830-c51cb08bc3dd type_name="CyDesigner.Common.ProjMgmt.Model.CyPrjMgmtWorkspaceSerialize" version="5" xml_contents_version="3" name="SSD1306_OLED" persistent="SSD1306_OLED.cywrk" platform="NOT_USED">
-<current_project name=".\02_driverAbstraction.cydsn\02_driverAbstraction.cyprj" />
+<current_project name=".\03_bleModule.cydsn\03_bleModule.cyprj" />
 <wrkspc_folders />
 <files />
 <projects>
 <v>.\01_Dev.cydsn\01_Dev.cyprj</v>
 <v>.\00_psoc4-template.cydsn\00_psoc4-template.cyprj</v>
 <v>.\02_driverAbstraction.cydsn\02_driverAbstraction.cyprj</v>
+<v>.\03_bleModule.cydsn\03_bleModule.cyprj</v>
 </projects>
 <workspace_id v="f9b7cbc1-1c7a-46b8-b2a6-9a3ffd180991" />
 <WriteAppVersionLastSavedWith v="4.4.0.80" />

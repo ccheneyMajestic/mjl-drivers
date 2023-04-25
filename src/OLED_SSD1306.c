@@ -137,7 +137,7 @@ uint32_t SSD1306_writeCommandArray(ssd1306_state_s *const state, uint8_t * cmdAr
 * \return
 *  Error code of the operation
 *******************************************************************************/
-uint32_t SSD1306_writeDataArray(ssd1306_state_s *const state, const uint8_t * dataArray, uint16_t len) {
+uint32_t SSD1306_writeDataArray(ssd1306_state_s *const state, uint8_t * dataArray, uint16_t len) {
     uint32_t error = 0;
     if(false == state->_isInitialized) {
         error |= ERROR_INIT;

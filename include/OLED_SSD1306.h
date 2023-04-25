@@ -96,7 +96,7 @@
   /* Object Configuration Structure */
   typedef struct{
     /* HAL Function Pointers */
-    uint32_t (*fn_spi_writeArrayBlocking) (uint8_t slaveId, const uint8_t * cmdArray, uint16_t len);
+    uint32_t (*fn_spi_writeArrayBlocking) (uint8_t slaveId, uint8_t *const cmdArray, uint16_t len);
     void (*fn_pin_reset_write) (uint8_t val);
     void (*fn_pin_dataCommand_write) (uint8_t val);
     void (*fn_delayMs)(uint32_t milliseconds);
@@ -114,7 +114,7 @@
     uint32_t output;
     uint32_t error;
     /* Input parameters */
-    uint32_t (*fn_spi_writeArrayBlocking) (uint8_t slaveId, const uint8_t * cmdArray, uint16_t len);
+    uint32_t (*fn_spi_writeArrayBlocking) (uint8_t slaveId, uint8_t *const cmdArray, uint16_t len);
     void (*fn_pin_reset_write) (uint8_t val);
     void (*fn_pin_dataCommand_write) (uint8_t val);
     void (*fn_delayMs)(uint32_t milliseconds);
@@ -142,7 +142,7 @@
   uint32_t SSD1306_init(ssd1306_state_s *const state, ssd1306_cfg_s *const cfg);
   uint32_t SSD1306_start(ssd1306_state_s *const state);
   uint32_t SSD1306_writeCommandArray(ssd1306_state_s *const state, uint8_t * cmdArray, uint8_t len);
-  uint32_t SSD1306_writeDataArray(ssd1306_state_s *const state, const uint8_t * dataArray, uint16_t len);
+  uint32_t SSD1306_writeDataArray(ssd1306_state_s *const state, uint8_t * dataArray, uint16_t len);
   uint32_t SSD1306_setWindow(ssd1306_state_s *const state, display_window_s *const window);
   uint32_t SSD1306_clearScreen(ssd1306_state_s *const state);
   uint32_t SSD1306_drawDigit_8x16(ssd1306_state_s *const state, uint8_t num);
