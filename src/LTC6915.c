@@ -1,21 +1,28 @@
 /***************************************************************************
-*                                       MICA
-* File: LTC6915.c
-* Workspace: micaOS
-* Project Name: libMica
-* Version: v1.0
-* Author: Craig Cheney
+*                                Majestic Labs © 2023
+* File: LTC6915.h
+* Workspace: MJL Driver Library 
+* Version: v1.0.0
+* Author: C. Cheney
 *
-* Brief:
-*   Driver file for the LTC6915 Instrumentation amplifier
-* 
-* Authors:
-*   Craig Cheney
+* Brief: Driver file for the LTC6915 Variable gain instrumentation amplifier 
+*   
 *
-* Change Log:
-*   2020.06.19 CC - Document created
+* 2023.04.25  - Document Created
 ********************************************************************************/
 #include "LTC6915.h" 
+
+/* Default configuration structure */
+const LTC6915_cfg_S ltc6915_default = {
+  .fn_pin_D0_Write = NULL, 
+  .fn_pin_D1_Write = NULL,
+  .fn_pin_D2_Write = NULL,
+  .fn_pin_D3_Write = NULL,
+  .fn_spiWriteArray = NULL,
+  .mode = 0,
+  .gainWord = 0,
+  .slaveId = 0,
+};
 
 /*******************************************************************************
 * Function Name: ltc6915_init()
@@ -37,15 +44,15 @@ uint32_t ltc6915_init(LTC6915_S *const state, LTC6915_cfg_S *const cfg){
   /* Verify Communication Functions */
   if (LTC6915_MODE_SERIAL == cfg->mode){
     /* Check SPI functions */
-    error |= (cfg->fn_spiWriteArray == NULL) ? ERROR_POINTER : ERROR_NONE;
+    error |= (NULL == cfg->fn_spiWriteArray) ? ERROR_POINTER : ERROR_NONE;
     /* slaveID: No limitation on value */
   }
   /* Parallel control */
   else if(LTC6915_MODE_PARALLEL == cfg->mode){
-    error |= (cfg->fn_pin_D0_Write == NULL) ? ERROR_POINTER : ERROR_NONE;
-    error |= (cfg->fn_pin_D1_Write == NULL) ? ERROR_POINTER : ERROR_NONE;
-    error |= (cfg->fn_pin_D2_Write == NULL) ? ERROR_POINTER : ERROR_NONE;
-    error |= (cfg->fn_pin_D3_Write == NULL) ? ERROR_POINTER : ERROR_NONE;
+    error |= (NULL == cfg->fn_pin_D0_Write) ? ERROR_POINTER : ERROR_NONE;
+    error |= (NULL == cfg->fn_pin_D1_Write) ? ERROR_POINTER : ERROR_NONE;
+    error |= (NULL == cfg->fn_pin_D2_Write) ? ERROR_POINTER : ERROR_NONE;
+    error |= (NULL == cfg->fn_pin_D3_Write) ? ERROR_POINTER : ERROR_NONE;
   }
   /* Unknown mode */
   else {error |= ERROR_MODE;}
@@ -69,7 +76,10 @@ uint32_t ltc6915_init(LTC6915_S *const state, LTC6915_cfg_S *const cfg){
     }
     /* Confirm initilization */
     state->_init = true;
+    state->_running = false;
   }
+  /* Ensure no errors */
+  if(error){state->_init = false;}
   return error;
 }
 
@@ -77,13 +87,11 @@ uint32_t ltc6915_init(LTC6915_S *const state, LTC6915_cfg_S *const cfg){
 * Function Name: ltc6915_start()
 ********************************************************************************
 * \brief
-*  
+*  Starts the LTC6915. Must be called after initialization. Sets the gain that
+*  was set at initialization
 *
-* \param state [out]
+* \param state [in/out]
 * Pointer to the state struct
-* 
-* \param cfg [in]
-* Pointer to the configuration struct
 *
 * \return
 *  Error code of the operation
@@ -91,6 +99,39 @@ uint32_t ltc6915_init(LTC6915_S *const state, LTC6915_cfg_S *const cfg){
 uint32_t ltc6915_start(LTC6915_S *const state) {
   uint32_t error = 0;
   if(!state->_init){error|=ERROR_INIT;}
+  if(state->_running){error|=ERROR_RUNNING;}
+
+  if(!error){
+    /* Pre-mark as running */
+    state->_running = true;
+    error |= ltc6915_setGainWord(state, state->gainWord);
+  }
+  /* Ensure no errors */
+  if(error){state->_running = false;}
+  return error;
+}
+
+/*******************************************************************************
+* Function Name: ltc6915_stop()
+********************************************************************************
+* \brief
+*  Sets the gain to zero and marks the struct as stopped 
+*
+* \param state [in/out]
+* Pointer to the state struct
+*
+* \return
+*  Error code of the operation
+*******************************************************************************/
+uint32_t ltc6915_stop(LTC6915_S *const state) {
+  uint32_t error = 0;
+  if(!state->_init){error|=ERROR_INIT;}
+  if(!state->_running){error|=ERROR_STOPPED;}
+
+  if(!error){
+    error |= ltc6915_setGainWord(state, LTC6915_GAIN_0);
+    state->_running = false;
+  }
 
   return error;
 }
@@ -114,8 +155,8 @@ uint32_t ltc6915_start(LTC6915_S *const state) {
   uint32_t ltc6915_setGainWord(LTC6915_S *const state, LTC6915_GAIN_T gainWord){
     uint32_t error = 0;
     if(!state->_init){error|=ERROR_INIT;}
-    error |= state->_init ? 0 : ERROR_INIT;
-    error |= ltc6915_isValidGainWord(gainWord) ? ERROR_VAL: 0;
+    if(!state->_running){error|=ERROR_STOPPED;}
+    if(!ltc6915_isValidGainWord(gainWord)){error|=ERROR_VAL;}
 
     if(!error){
       if(LTC6915_MODE_SERIAL == state->mode){
@@ -151,7 +192,7 @@ uint32_t ltc6915_start(LTC6915_S *const state) {
 * \return
 *  Error of the operation
 *******************************************************************************/
-  uint32_t ltc6915_valueFromWord(LTC6915_GAIN_T gainWord, uint16_t *const result){
+uint32_t ltc6915_valueFromWord(LTC6915_GAIN_T gainWord, uint16_t *const result){
   uint32_t error = 0;
   error |= ltc6915_isValidGainWord(gainWord);
   uint8_t val = 0;
@@ -217,7 +258,7 @@ bool ltc6915_isValidGainWord(uint8_t gainWord){
   bool isValidGainWord = false;
   for(uint8_t i=LTC6915_GAIN_0; i<LTC6915_GAIN_4096; i++){
     if(gainWord == i){
-      isValidGainWord == true;
+      isValidGainWord = true;
       break;
     }
   }

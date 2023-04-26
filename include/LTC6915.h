@@ -5,7 +5,7 @@
 * Version: v1.0.0
 * Author: C. Cheney
 *
-* Brief: Common errors for the MJL library 
+* Brief: Driver file for the LTC6915 Variable gain instrumentation amplifier 
 *   
 *
 * 2023.04.25  - Document Created
@@ -78,14 +78,17 @@
     LTC6915_GAIN_T gainWord;   /* Gain word of the amp */
     uint8_t slaveId;      /* ID of the slave in serial mode*/
     bool _init; /* Initialization error */
+    bool _running;  /* Is the device running */
   } LTC6915_S;
 
+  extern const LTC6915_cfg_S ltc6915_default;
   /***************************************
   * Function declarations 
   ***************************************/
   /* State operations */
   uint32_t ltc6915_init(LTC6915_S *const state, LTC6915_cfg_S *const cfg);
   uint32_t ltc6915_start(LTC6915_S *const state);
+  uint32_t ltc6915_stop(LTC6915_S *const state);
   uint32_t ltc6915_setGainWord(LTC6915_S *const state, LTC6915_GAIN_T gainWord);
   /* Utils */
   uint32_t ltc6915_valueFromWord(LTC6915_GAIN_T gainWord, uint16_t *const result);
