@@ -13,10 +13,10 @@
 #include "mjl_spi.h"
 
 const MJL_SPI_CFG_S spi_cfg_default = {
-  req_fn_writeArray
-  req_fn_read
-  opt_fn_externalStart
-  opt_fn_externalStop
+  .req_hal_writeArray=NULL,
+  .req_hal_read=NULL,
+  .opt_hal_externalStart=NULL,
+  .opt_hal_externalStop=NULL,
 };
 
 

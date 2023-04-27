@@ -11,3 +11,4 @@
 codegentemp/
 Generated_Source/
 CortexM0/
+build/
