@@ -7,6 +7,7 @@
 *.log
 *.svd
 
+.vscode/
 codegentemp/
 Generated_Source/
 CortexM0/

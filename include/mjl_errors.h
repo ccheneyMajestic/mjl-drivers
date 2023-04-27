@@ -36,6 +36,7 @@
   #define ERROR_SHIFT_INVALID       (6) /* Shift of an invalid operation */
   #define ERROR_SHIFT_MODE          (7) /* Shift of an invalid modeWhat */
   #define ERROR_SHIFT_PARAM         (8) /* Shift of A bad parameter was included */
+  #define ERROR_SHIFT_UNAVAILABLE   (9) /* Shift of no data available */
 
   #define ERROR_NONE                (0)   /* No error */
   #define ERROR_POINTER             (1 << ERROR_SHIFT_POINTER) 
@@ -47,6 +48,7 @@
   #define ERROR_INVALID             (1 << ERROR_SHIFT_INVALID) 
   #define ERROR_MODE                (1 << ERROR_SHIFT_MODE) 
   #define ERROR_PARAM               (1 << ERROR_SHIFT_PARAM) 
+  #define ERROR_UNAVAILABLE         (1 << ERROR_SHIFT_UNAVAILABLE) 
     
   /***************************************
   * Enumerated Types

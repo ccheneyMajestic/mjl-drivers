@@ -21,10 +21,11 @@ const uint8_t hexAscii[HEX_VAL_MAX+1] = "0123456789ABCDEF";
 
 /* Default config struct */
 const MJL_UART_CFG_S uart_cfg_default = {
-  .fn_writeArray = NULL,
-  .fn_read = NULL,
-  .fn_externalStart = NULL,
-  .baud = 0,
+  .hal_req_writeArray = NULL,
+  .hal_req_read = NULL,
+  .hal_opt_externalStart = NULL,
+  .hal_opt_externalStop = NULL,
+  .opt_baud = 0,
 };
 
 /*******************************************************************************
@@ -45,18 +46,19 @@ const MJL_UART_CFG_S uart_cfg_default = {
 uint32_t uart_init(MLJ_UART_S *const state, MJL_UART_CFG_S *const cfg){
   uint32_t error = 0;
   /* Verify required functions */
-  error |= (NULL == cfg->fn_writeArray) ? ERROR_POINTER : ERROR_NONE;
-  error |= (NULL == cfg->fn_read) ? ERROR_POINTER : ERROR_NONE;
+  error |= (NULL == cfg->hal_req_writeArray) ? ERROR_POINTER : ERROR_NONE;
+  error |= (NULL == cfg->hal_req_read) ? ERROR_POINTER : ERROR_NONE;
   /* external start is not required */
   /* external stop is not required */
-  error |= (0 == cfg->baud) ? ERROR_VAL : ERROR_NONE;
+  /* baud is not required */
   /* Valid Inputs */
   if(!error) {
     /* Copy params */
-    state->fn_writeArray = cfg->fn_writeArray;
-    state->fn_read = cfg->fn_read;
-    state->fn_externalStart = cfg->fn_externalStart;
-    state->baud = cfg->baud;
+    state->hal_req_writeArray = cfg->hal_req_writeArray;
+    state->hal_req_read = cfg->hal_req_read;
+    state->hal_opt_externalStart =  cfg->hal_opt_externalStart;
+    state->hal_opt_externalStop = cfg->hal_opt_externalStop;
+    state->baud = cfg->opt_baud;
     /* Mark as initialized */
     state->_init = true;
     state->_running = false;
@@ -87,8 +89,8 @@ uint32_t uart_start(MLJ_UART_S *const state){
     /* Pre-mark as running */
     state->_running = true;
     /* Run the external start function if present  */
-    if(NULL != state->fn_externalStart){
-      error |= state->fn_externalStart(state->baud);
+    if(NULL != state->hal_opt_externalStart){
+      error |= state->hal_opt_externalStart((MLJ_UART_T *const) state);
     }
   }
   return error;
@@ -113,8 +115,8 @@ uint32_t uart_stop(MLJ_UART_S *const state){
 
   if(!error){
     /* Run the external stop function if present  */
-    if(NULL != state->fn_externalStop){
-      state->fn_externalStop();
+    if(NULL != state->hal_opt_externalStop){
+      error |= state->hal_opt_externalStop((MLJ_UART_T *const) state);
     }
     state->_running = false;
   }
@@ -184,7 +186,7 @@ uint32_t uart_writeArray(MLJ_UART_S *const state, uint8_t * array, uint16_t len)
   if(!state->isLoggingEnabled){error|=ERROR_MODE;}
 
   if(!error){
-    error|= state->fn_writeArray(array, len);
+    error|= state->hal_req_writeArray(array, len);
   }
   return error;
 }
@@ -214,7 +216,7 @@ uint32_t uart_readArray(MLJ_UART_S *const state, uint8_t * array, uint16_t len){
 
   if(!error){
     for(uint16_t i=0; i<len; i++){
-      error |= state->fn_read(&array[i]);
+      error |= state->hal_req_read(&array[i]);
       if(error){break;}
     }
   }
@@ -248,7 +250,7 @@ uint32_t uart_write_reverse(MLJ_UART_S *const state, uint8_t * array, uint16_t l
 
   if(!error){
     for(uint16_t i = len; i >0; i--){
-      error|= state->fn_writeArray(&array[i-1], 1);
+      error|= state->hal_req_writeArray(&array[i-1], 1);
       if(error){break;}
     }
   }
@@ -280,7 +282,7 @@ uint32_t uart_print(MLJ_UART_S* state, const char *pszFmt) {
     /* Find the length */
     uint16_t len=0;
     while(0 != pszFmt[len]){len++;}
-    state->fn_writeArray((uint8_t *) pszFmt, len);
+    state->hal_req_writeArray((uint8_t *) pszFmt, len);
   }
   return error;
 }
@@ -367,15 +369,13 @@ uint32_t uart_printf(MLJ_UART_S* state, const char *pszFmt,...) {
   if(!state->_init){error|=ERROR_INIT;}
   if(!state->_running){error|=ERROR_STOPPED;}
   if(!state->isLoggingEnabled){error|=ERROR_MODE;}
-
   if(!error){
     va_list args;
     va_start(args, pszFmt);
-
     while(*pszFmt) {
       /* Print until the format specifier is encountered */
       if('%' != *pszFmt) {
-        error |= state->fn_writeArray((uint8_t *) pszFmt, 1);
+        error |= state->hal_req_writeArray((uint8_t *) pszFmt, 1);
         pszFmt++;
         continue;
       }
@@ -386,12 +386,11 @@ uint32_t uart_printf(MLJ_UART_S* state, const char *pszFmt,...) {
         /* Get the pointer to the string */
         char* str = (char*) va_arg(args, int);
         for(; *str != '\0'; str++){
-          error |= state->fn_writeArray((uint8_t *)str,1);
+          error |= state->hal_req_writeArray((uint8_t *)str,1);
         }
         pszFmt++;
         continue;
       }
-
       /* Boolean */
       else if(*pszFmt == 'b'){
         bool bVal = (bool) va_arg(args, int);
@@ -416,7 +415,7 @@ uint32_t uart_printf(MLJ_UART_S* state, const char *pszFmt,...) {
           i--;
           uint8_t ascii = 0;
           error |= uart_hex2Ascii(buffer[i], &ascii);
-          error |= state->fn_writeArray(&ascii,1);
+          error |= state->hal_req_writeArray(&ascii,1);
         }
         pszFmt++;
         continue;
@@ -424,7 +423,7 @@ uint32_t uart_printf(MLJ_UART_S* state, const char *pszFmt,...) {
       /* Character */
       else if(*pszFmt == 'c') {
         uint8_t cVal = (uint8_t) va_arg(args, int);
-        error |= state->fn_writeArray(&cVal,1);
+        error |= state->hal_req_writeArray(&cVal,1);
         pszFmt++;
         continue;
       }
@@ -433,7 +432,6 @@ uint32_t uart_printf(MLJ_UART_S* state, const char *pszFmt,...) {
         uint16_t hexVal = (uint16_t) va_arg(args, int);
         uint32_t i = 0;
         uint32_t buffer[12] = {0};
-
         do{
           buffer[i++] = hexVal % HEX_VAL_MAX;
           hexVal /= HEX_VAL_MAX;
@@ -448,18 +446,16 @@ uint32_t uart_printf(MLJ_UART_S* state, const char *pszFmt,...) {
           i--;
           uint8_t ascii = 0;
           error |= uart_hex2Ascii(buffer[i], &ascii);
-          error |= state->fn_writeArray(&ascii,1);
+          error |= state->hal_req_writeArray(&ascii,1);
         }
         pszFmt++;
         continue;
       }
-
       /* Hex val - 32 bits */
       else if(*pszFmt == 'X') {
         uint32_t hexVal = (uint32_t) va_arg(args, long);
         uint32_t i = 0;
         uint32_t buffer[12] = {0};
-
         do{
           buffer[i++] = hexVal % HEX_VAL_MAX;
           hexVal /= HEX_VAL_MAX;
@@ -474,7 +470,7 @@ uint32_t uart_printf(MLJ_UART_S* state, const char *pszFmt,...) {
           i--;
           uint8_t ascii = 0;
           error |= uart_hex2Ascii(buffer[i], &ascii);
-          error |= state->fn_writeArray(&ascii,1);
+          error |= state->hal_req_writeArray(&ascii,1);
         }
         pszFmt++;
         continue;
@@ -492,8 +488,6 @@ uint32_t uart_printf(MLJ_UART_S* state, const char *pszFmt,...) {
         size_t len =0u;
         double diff = 0.0;
         double val = va_arg(args, double);
-
-
         /* Test for special values */
         if(val != val){
           uart_print(state, "NaN");
@@ -527,12 +521,10 @@ uint32_t uart_printf(MLJ_UART_S* state, const char *pszFmt,...) {
           buf[len++] = '0';
           prec--;
         }
-
         int whole = (int) val;
         double tmp = (val - whole) * pow10[prec];
         unsigned long frac = (unsigned long) tmp;
         diff = tmp - frac;
-
         if(diff > 0.5){
           ++frac;
           /* Handle rollover, e.g. case 0.99 with prec 1 is 1.0 */
@@ -546,7 +538,6 @@ uint32_t uart_printf(MLJ_UART_S* state, const char *pszFmt,...) {
           /* if halfware round up if odd or if last digit is 0 */
           ++frac;
         }
-
         if(prec == 0u){
           diff = val - (double) whole;
           if((!(diff < 0.5) || (diff > 0.5)) && (whole & 1)) {
@@ -574,7 +565,6 @@ uint32_t uart_printf(MLJ_UART_S* state, const char *pszFmt,...) {
             buf[len++] = '.';
           }
         }
-
         /* Do whole part, number is reversed */
         while(len < UART_FLOAT_BUFFER_SIZE) {
           buf[len++] = (char) (48 + (whole % 10));
@@ -582,13 +572,11 @@ uint32_t uart_printf(MLJ_UART_S* state, const char *pszFmt,...) {
             break;
           }
         }
-
         if(len < UART_FLOAT_BUFFER_SIZE){
           if(neg){
             buf[len++] = '-';
           }
         }
-
         /* Print out */
         error |= uart_write_reverse(state, buf, len);
         pszFmt++;
@@ -601,7 +589,6 @@ uint32_t uart_printf(MLJ_UART_S* state, const char *pszFmt,...) {
     }
     va_end(args);
   }
-
   return error;
 }
 

@@ -5,7 +5,7 @@
 * Version: v1.0.0
 * Author: C. Cheney
 *
-* Brief: Serial communication library for the MJL driver library 
+* Brief: Serial communication middleware for the MJL driver library 
 *   
 *
 * 2023.04.26  - Document Created
@@ -41,21 +41,23 @@
   /***************************************
   * Structures 
   ***************************************/
+  /* Forward declare struct */
+  typedef struct MLJ_UART_S MLJ_UART_T;
   /* Configuration Structure */
   typedef struct {
-    uint32_t (*fn_writeArray)(const uint8_t *array, uint16_t len);  /* Write data into the TX buffer */
-    uint32_t (*fn_read)(uint8_t *result);         /* Move data from the RX buffer to the result */
-    uint32_t (*fn_externalStart)(uint32_t baud);              /* Optional External start function */
-    void (*fn_externalStop)(void);                        /* Optional External stop function */
-    uint32_t baud; /* Baud rate */ 
+    uint32_t (*hal_req_writeArray)(const uint8_t *array, uint16_t len);  /* Write data into the TX buffer */
+    uint32_t (*hal_req_read)(uint8_t *result);         /* Move data from the RX buffer to the result */
+    uint32_t (*hal_opt_externalStart)(MLJ_UART_T *const);              /* Optional External start function */
+    uint32_t (*hal_opt_externalStop)(MLJ_UART_T *const);                        /* Optional External stop function */
+    uint32_t opt_baud; /* Baud rate */ 
   } MJL_UART_CFG_S;
 
   /* Serial State Object   */
   typedef struct {
-    uint32_t (*fn_writeArray)(const uint8_t *array, uint16_t len);  /* Write data into the TX buffer */
-    uint32_t (*fn_read)(uint8_t *result);         /* Move data from the RX buffer to the result */
-    uint32_t (*fn_externalStart)(uint32_t baud);              /* Optional External start function */
-    void (*fn_externalStop)(void);                        /* Optional External stop function */
+    uint32_t (*hal_req_writeArray)(const uint8_t *array, uint16_t len);  /* Write data into the TX buffer */
+    uint32_t (*hal_req_read)(uint8_t *result);         /* Move data from the RX buffer to the result */
+    uint32_t (*hal_opt_externalStart)(MLJ_UART_T *const);              /* Optional External start function */
+    uint32_t (*hal_opt_externalStop)(MLJ_UART_T *const);                        /* Optional External stop function */
     uint32_t baud;
 
     bool _init;
@@ -83,6 +85,7 @@
   uint32_t uart_printf(MLJ_UART_S* state, const char *pszFmt,...);
   uint32_t uart_printlnf(MLJ_UART_S* state, const char *pszFmt,...);
 
+  /* Utility Operations */
   uint32_t uart_printHeader(MLJ_UART_S* state, const char* name, const char *date, const char* time);
   uint32_t uart_hex2Ascii(uint8_t hex, uint8_t* ascii);
 
