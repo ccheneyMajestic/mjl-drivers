@@ -6,6 +6,7 @@
 *.xml
 *.log
 *.svd
+*.s
 
 .vscode/
 codegentemp/
