@@ -37,36 +37,36 @@ uint32_t SSD1306_init(ssd1306_state_s *const state, ssd1306_cfg_s *const cfg) {
     error |= (cfg->fn_spi_writeArrayBlocking == NULL) ? ERROR_POINTER : ERROR_NONE;
     error |= (cfg->fn_pin_reset_write == NULL) ? ERROR_POINTER : ERROR_NONE;
     error |= (cfg->fn_pin_dataCommand_write == NULL) ? ERROR_POINTER : ERROR_NONE;
-    error |= (cfg->fn_delayMs == NULL) ? ERROR_POINTER : ERROR_NONE;
+    error |= (cfg->fn_delayUs == NULL) ? ERROR_POINTER : ERROR_NONE;
     /* Verify values */
     error |= (cfg->fullWindow.colEnd == 0) ? ERROR_VAL : ERROR_NONE;
     error |= (cfg->fullWindow.pageEnd == 0) ? ERROR_VAL : ERROR_NONE;
 
     if(!error) {
-        /* Marked struct as initialzied */
-        state->_isInitialized = true;
-        /* Copy pointers from cfg */
-        state->fn_spi_writeArrayBlocking = cfg->fn_spi_writeArrayBlocking;
-        state->fn_pin_reset_write = cfg->fn_pin_reset_write;
-        state->fn_pin_dataCommand_write = cfg->fn_pin_dataCommand_write;
-        state->fn_delayMs = cfg->fn_delayMs;
-        /* Copy Value from cfg */
-        state->fullWindow.colStart  = cfg->fullWindow.colStart;
-        state->fullWindow.colEnd    = cfg->fullWindow.colEnd;
-        state->fullWindow.pageStart = cfg->fullWindow.pageStart;
-        state->fullWindow.pageEnd   = cfg->fullWindow.pageEnd;
-        state->spi_slaveId = cfg->spi_slaveId;
-        /* Set default values */
-        state->output = 0;
-        state->error = 0;
-        state->state_current = SSD1306_STATE_OFF;
-        state->state_next = SSD1306_STATE_OFF;
-        state->state_previous = SSD1306_STATE_OFF;
-        state->state_requested = SSD1306_STATE_OFF;
+      /* Marked struct as initialzied */
+      state->_isInitialized = true;
+      /* Copy pointers from cfg */
+      state->fn_spi_writeArrayBlocking = cfg->fn_spi_writeArrayBlocking;
+      state->fn_pin_reset_write = cfg->fn_pin_reset_write;
+      state->fn_pin_dataCommand_write = cfg->fn_pin_dataCommand_write;
+      state->fn_delayUs = cfg->fn_delayUs;
+      /* Copy Value from cfg */
+      state->fullWindow.colStart  = cfg->fullWindow.colStart;
+      state->fullWindow.colEnd    = cfg->fullWindow.colEnd;
+      state->fullWindow.pageStart = cfg->fullWindow.pageStart;
+      state->fullWindow.pageEnd   = cfg->fullWindow.pageEnd;
+      state->spi_slaveId = cfg->spi_slaveId;
+      /* Set default values */
+      state->output = 0;
+      state->error = 0;
+      state->state_current = SSD1306_STATE_OFF;
+      state->state_next = SSD1306_STATE_OFF;
+      state->state_previous = SSD1306_STATE_OFF;
+      state->state_requested = SSD1306_STATE_OFF;
     }
     else {
-        state->_isInitialized = false;
-        state->error = error;
+      state->_isInitialized = false;
+      state->error = error;
     }
     return error;
 }
@@ -81,27 +81,52 @@ uint32_t SSD1306_init(ssd1306_state_s *const state, ssd1306_cfg_s *const cfg) {
 *  Error code of the operation
 *******************************************************************************/
 uint32_t SSD1306_start(ssd1306_state_s *const state){
-    uint32_t error = 0;
-    if(false == state->_isInitialized) {
-        error |= ERROR_INIT;
-    }
-    if(!error){
-        /* Hardware Reset */
-        state->fn_pin_reset_write(SSD1306_RESET_ASSERT);
-        state->fn_delayMs(1);
-        state->fn_pin_reset_write(SSD1306_RESET_DISASSERT);
-        state->fn_delayMs(1);
-        #define SSD_START_ARRAY_LEN 10
-        uint8_t startCommands[SSD_START_ARRAY_LEN] = {
-            SSD1306_CMD_CHARGE_PUMP, SSD1306_CMD_CHARGE_PUMP_ON,  /* Enable the charge pump */
-            SSD1306_CMD_ADDRESS_MODE, SSD1306_CMD_ADDRESS_MODE_HORIZONTAL, /* Set to horizontal addressing */
-            SSD1306_CMD_ON /* Wakeup from sleep */
-        };
-        error |= SSD1306_writeCommandArray(state, startCommands, SSD_START_ARRAY_LEN);
-        error |= SSD1306_clearScreen(state);
-    }
-    return error;
+  uint32_t error = 0;
+  if(!state->_isInitialized){error|=ERROR_INIT;}
+  if(!error){
+    /* Hardware Reset */
+    state->fn_pin_reset_write(SSD1306_RESET_ASSERT);
+    state->fn_pin_dataCommand_write(SSD1306_DC_DATA);
+    state->fn_delayUs(SSD1306_DELAY_US_RESET);
+    state->fn_pin_reset_write(SSD1306_RESET_DISASSERT);
+    state->fn_delayUs(SSD1306_DELAY_US_RESET);
+    #define SSD_START_ARRAY_LEN 5
+    uint8_t startCommands[SSD_START_ARRAY_LEN] = {
+      SSD1306_CMD_CHARGE_PUMP, SSD1306_CMD_CHARGE_PUMP_ON,  /* Enable the charge pump */
+      SSD1306_CMD_ADDRESS_MODE, SSD1306_CMD_ADDRESS_MODE_HORIZONTAL, /* Set to horizontal addressing */
+      SSD1306_CMD_ON /* Wakeup from sleep */
+    };
+    error |= SSD1306_writeCommandArray(state, startCommands, SSD_START_ARRAY_LEN);
+    // error |= SSD1306_setWindow(state, &state->fullWindow);
+    // error |= SSD1306_clearScreen(state);
+  }
+  return error;
 }
+
+/*******************************************************************************
+* Function Name: SSD1306_start()
+********************************************************************************
+* \brief
+*   Initializes the OLED
+*
+* \return
+*  Error code of the operation
+*******************************************************************************/
+uint32_t SSD1306_stop(ssd1306_state_s *const state){
+  uint32_t error = 0;
+  if(!state->_isInitialized){error|=ERROR_INIT;}
+  if(!error){
+    uint8_t stopCommand = SSD1306_CMD_SLEEP;
+    error |= SSD1306_writeCommandArray(state, &stopCommand, 1);
+    /* Hardware Reset */
+    state->fn_pin_reset_write(SSD1306_RESET_DISASSERT);
+    state->fn_pin_dataCommand_write(SSD1306_DC_COMMAND);
+    state->fn_delayUs(SSD1306_DELAY_US_RESET);
+
+  }
+  return error;
+}
+
 
 /*******************************************************************************
 * Function Name: SSD1306_writeCommandArray()
@@ -114,16 +139,15 @@ uint32_t SSD1306_start(ssd1306_state_s *const state){
 *******************************************************************************/
 uint32_t SSD1306_writeCommandArray(ssd1306_state_s *const state, uint8_t * cmdArray, uint8_t len) {
     uint32_t error = 0;
-    if(false == state->_isInitialized) {
-        error |= ERROR_INIT;
-    }
+    if(!state->_isInitialized){error|=ERROR_INIT;}
     if(!error) {
-        /* Set the Command line low */
-        state->fn_pin_dataCommand_write(SSD1306_DC_COMMAND);
-        /* Write array and wait until complete */
-        error |= state->fn_spi_writeArrayBlocking(state->spi_slaveId, cmdArray, len);
-        /* Switch back to Data mode */
-        state->fn_pin_dataCommand_write(SSD1306_DC_DATA);
+      /* Set the Command line low */
+      state->fn_pin_dataCommand_write(SSD1306_DC_COMMAND);
+      state->fn_delayUs(SSD1306_DELAY_US_DC);
+      /* Write array and wait until complete */
+      error |= state->fn_spi_writeArrayBlocking(state->spi_slaveId, cmdArray, len);
+      /* Switch back to Data mode */
+      state->fn_pin_dataCommand_write(SSD1306_DC_DATA);
     }        
     return error;
 }
@@ -139,14 +163,13 @@ uint32_t SSD1306_writeCommandArray(ssd1306_state_s *const state, uint8_t * cmdAr
 *******************************************************************************/
 uint32_t SSD1306_writeDataArray(ssd1306_state_s *const state, uint8_t * dataArray, uint16_t len) {
     uint32_t error = 0;
-    if(false == state->_isInitialized) {
-        error |= ERROR_INIT;
-    }
+    if(!state->_isInitialized){error|=ERROR_INIT;}
     if(!error) {
-        /* Assert that data is being written */
-        state->fn_pin_dataCommand_write(SSD1306_DC_DATA);
-        /* Write array and wait until complete */
-        error |= state->fn_spi_writeArrayBlocking(state->spi_slaveId, dataArray, len);
+      /* Assert that data is being written */
+      state->fn_pin_dataCommand_write(SSD1306_DC_DATA);
+      state->fn_delayUs(SSD1306_DELAY_US_DC);
+      /* Write array and wait until complete */
+      error |= state->fn_spi_writeArrayBlocking(state->spi_slaveId, dataArray, len);
     }       
     return error;
 }
@@ -161,19 +184,18 @@ uint32_t SSD1306_writeDataArray(ssd1306_state_s *const state, uint8_t * dataArra
 *  Error code of the operation
 *******************************************************************************/
 uint32_t SSD1306_setWindow(ssd1306_state_s *const state, display_window_s *const window) {
-    uint32_t error = 0;
-    if(false == state->_isInitialized) {
-        error |= ERROR_INIT;
-    }
-    if(!error) {
-        #define WINDOW_BUFFER_LEN 6
-        uint8_t dataArray[WINDOW_BUFFER_LEN] = {
-            SSD1306_CMD_COLUMN_ADDR, window->colStart, window->colEnd,
-            SSD1306_CMD_PAGE_ADDR, window->pageStart, window->pageEnd
-        };
-        error |= SSD1306_writeCommandArray(state, dataArray, WINDOW_BUFFER_LEN);
-    }
-    return error;
+  uint32_t error = 0;
+  if(!state->_isInitialized){error|=ERROR_INIT;}
+
+  if(!error) {
+    #define WINDOW_BUFFER_LEN 6
+    uint8_t dataArray[WINDOW_BUFFER_LEN] = {
+      SSD1306_CMD_COLUMN_ADDR, window->colStart, window->colEnd,
+      SSD1306_CMD_PAGE_ADDR, window->pageStart, window->pageEnd
+    };
+    error |= SSD1306_writeCommandArray(state, dataArray, WINDOW_BUFFER_LEN);
+  }
+  return error;
 }
 
 /*******************************************************************************
@@ -186,32 +208,26 @@ uint32_t SSD1306_setWindow(ssd1306_state_s *const state, display_window_s *const
 *  Error code of the operation
 *******************************************************************************/
 uint32_t SSD1306_clearScreen(ssd1306_state_s *const state){
-    uint32_t error = 0;
-    if(false == state->_isInitialized) {
-        error |= ERROR_INIT;
+  uint32_t error = 0;
+  if(!state->_isInitialized){error|=ERROR_INIT;}
+
+  if(!error) {
+    /* Make an empty page */
+    uint8_t blankPage[SSD1306_NUM_COLS];
+    memset(blankPage, 0, SSD1306_NUM_COLS);
+    error |= SSD1306_setWindow(state, &state->fullWindow);
+    uint8_t i;
+    /* Write all the pages */
+    for(i=0; i < SSD1306_NUM_PAGE; i++){
+      error|= SSD1306_writeDataArray(state, blankPage,SSD1306_NUM_COLS);
+      if(error){
+        // printLn(&usb, "Clear error %i",error);
+        break;
+      }
     }
-    if(!error) {
-        /* Make an empty page */
-        uint8_t blankPage[SSD1306_NUM_COLS];
-        memset(blankPage, 0, SSD1306_NUM_COLS);
-        error |= SSD1306_setWindow(state, &state->fullWindow);
-        uint8_t i;
-        /* Write all the pages */
-        for(i=0; i < SSD1306_NUM_PAGE; i++){
-            error|= SSD1306_writeDataArray(state, blankPage,SSD1306_NUM_COLS);
-            if(error){
-                // printLn(&usb, "Clear error %i",error);
-                break;
-            }
-        }
-    }
-    return error;
+  }
+  return error;
 }
-
-
-
-
-
 
 /*******************************************************************************
 * Function Name: SSD1306_drawDigit_8x16()
@@ -225,16 +241,12 @@ uint32_t SSD1306_clearScreen(ssd1306_state_s *const state){
 uint32_t SSD1306_drawDigit_8x16(ssd1306_state_s *const state, uint8_t num){
     uint32_t error = 0;
     /* Only Digits */
-    if(num >9){
-        error = ERROR_VAL;
-    }
+    if(num>9){error|=ERROR_VAL;}
     if(!error) {
-        error |= SSD1306_writeDataArray(state, digits_8x16[num], UI_TEXT_8x16_LEN);
+      error |= SSD1306_writeDataArray(state, digits_8x16[num], UI_TEXT_8x16_LEN);
     }
     return error;
 }
-
-
 
 /*******************************************************************************
 * Function Name: SSD1306_setDigits()
@@ -255,29 +267,26 @@ uint32_t SSD1306_setDigits(ssd1306_state_s *const state, uint8_t* digits, displa
     uint32_t error = 0;
     /* Only support whole pages right now */
     if(pos->origin_row % SSD1306_PAGE_HEIGHT != 0){
-        error |= ERROR_VAL;
-        // printLn(&usb, "Non integer page row location %i", pos->origin_row);
+      error |= ERROR_VAL;
+      // printLn(&usb, "Non integer page row location %i", pos->origin_row);
     }
-        
     if(!error) {
-        uint8_t i; 
-        bool shouldDigitRender = false;
-        for(i=0; i < pos->repeat_num; i++){
-            /* Don't render leading zeros */
-            if(shouldDigitRender || digits[i] > 0 ){
-                shouldDigitRender = true;
-            }
-            /* Render last 0 */
-            else if(i == pos->repeat_num -1){}
-            else {continue;}
-            /* Calculate the window */
-            display_window_s window;
-            error |= windowFromPos(pos, i, &window);
-            error |= SSD1306_setWindow(state, &window); 
-            /* draw the digit */
-            error |= SSD1306_drawDigit_8x16(state, digits[i]);
-            if(error){break;}
-        }
+      uint8_t i; 
+      bool shouldDigitRender = false;
+      for(i=0; i < pos->repeat_num; i++){
+        /* Don't render leading zeros */
+        if(shouldDigitRender || digits[i] > 0){shouldDigitRender=true;}
+        /* Render last 0 */
+        else if(i == pos->repeat_num -1){}
+        else {continue;}
+        /* Calculate the window */
+        display_window_s window;
+        error |= windowFromPos(pos, i, &window);
+        error |= SSD1306_setWindow(state, &window); 
+        /* draw the digit */
+        error |= SSD1306_drawDigit_8x16(state, digits[i]);
+        if(error){break;}
+      }
     }
     return error;
 }
@@ -301,34 +310,29 @@ uint32_t SSD1306_setDigits_16x32(ssd1306_state_s *const state, uint8_t *digits, 
     uint32_t error = 0;
     /* Only support whole pages right now */
     if(pos->origin_row % SSD1306_PAGE_HEIGHT != 0){
-        error = 1;
-        // printLn(&usb, "Non integer page row location %i", pos->origin_row);
+      error = 1;
+      // printLn(&usb, "Non integer page row location %i", pos->origin_row);
     }
-        
     if(!error) {
-        uint8_t i; 
-        bool shouldDigitRender = false;
-        for(i=0; i < pos->repeat_num; i++){
-            /* Don't render leading zeros */
-            if(shouldDigitRender || digits[i] > 0 ){
-                shouldDigitRender = true;
-            }
-            /* Render last 0 */
-            else if(i == pos->repeat_num -1){}
-            else {
-                continue;
-            }
-            /* Calculate the digit */
-            uint8_t newLetter[DISPLAY_LEN_16x32];
-            error |= create16x32(digits_8x16[digits[i]], newLetter);
-            /* Calculate the window */
-            display_window_s window;
-            error |= windowFromPos(pos, i, &window);
-            error |= SSD1306_setWindow(state, &window); 
-            /* draw the digit */
-            error |= SSD1306_writeDataArray(state, newLetter, DISPLAY_LEN_16x32);
-            if(error){break;}
-        }
+      uint8_t i; 
+      bool shouldDigitRender = false;
+      for(i=0; i < pos->repeat_num; i++){
+        /* Don't render leading zeros */
+        if(shouldDigitRender || digits[i] > 0 ){shouldDigitRender = true;}
+        /* Render last 0 */
+        else if(i == pos->repeat_num -1){}
+        else {continue;}
+        /* Calculate the digit */
+        uint8_t newLetter[DISPLAY_LEN_16x32];
+        error |= create16x32(digits_8x16[digits[i]], newLetter);
+        /* Calculate the window */
+        display_window_s window;
+        error |= windowFromPos(pos, i, &window);
+        error |= SSD1306_setWindow(state, &window); 
+        /* draw the digit */
+        error |= SSD1306_writeDataArray(state, newLetter, DISPLAY_LEN_16x32);
+        if(error){break;}
+      }
     }
     return error;
 }
@@ -349,29 +353,26 @@ uint32_t SSD1306_setDigits_16x32(ssd1306_state_s *const state, uint8_t *digits, 
 *  Error code of the operation
 *******************************************************************************/
 uint32_t SSD1306_setLetters(ssd1306_state_s *const state, const uint8_t **letters, display_position_s *const pos){
-    uint32_t error = 0;
-    /* Only support whole pages right now */
-    if(pos->origin_row % SSD1306_PAGE_HEIGHT != 0){
-        error = 1;
-        // printLn(&usb, "Non integer page row location %i", pos->origin_row);
+  uint32_t error = 0;
+  /* Only support whole pages right now */
+  if(pos->origin_row % SSD1306_PAGE_HEIGHT != 0){
+    error = 1;
+    // printLn(&usb, "Non integer page row location %i", pos->origin_row);
+  }
+  if(!error) {
+    uint8_t i; 
+    for(i=0; i < pos->repeat_num; i++){
+      /* Calculate the window */
+      display_window_s window;
+      error |= windowFromPos(pos, i, &window);
+      error |= SSD1306_setWindow(state, &window); 
+      /* draw the digit */
+      error |= SSD1306_writeDataArray(state, letters[i], UI_TEXT_8x16_LEN); 
+      if(error){break;}
     }
-        
-    if(!error) {
-        uint8_t i; 
-        for(i=0; i < pos->repeat_num; i++){
-            /* Calculate the window */
-            display_window_s window;
-            error |= windowFromPos(pos, i, &window);
-            error |= SSD1306_setWindow(state, &window); 
-            /* draw the digit */
-            error |= SSD1306_writeDataArray(state, letters[i], UI_TEXT_8x16_LEN); 
-            if(error){break;}
-        }
-    }
-    return error;
+  }
+  return error;
 }
-
-
 
 /*******************************************************************************
 * Function Name: windowFromPos()
@@ -392,22 +393,22 @@ uint32_t SSD1306_setLetters(ssd1306_state_s *const state, const uint8_t **letter
 *  Error code of the operation
 *******************************************************************************/
 uint32_t windowFromPos(display_position_s *const pos, uint8_t instanceNum, display_window_s *const window) {
-    uint32_t error = 0;
-    /* Calculate the window */
-    uint8_t pageStart = pos->origin_row/SSD1306_PAGE_HEIGHT;
-    uint8_t pageEnd = pageStart + (pos->size_rows/SSD1306_PAGE_HEIGHT) - 1;
-    /* Linear repeat pattern */
-    uint8_t colStart = pos->origin_col + instanceNum*pos->size_cols;
-    /* Add spacing */
-    colStart+= pos->repeat_spacing*instanceNum;
-    uint8_t colEnd = colStart + pos->size_cols - 1;
+  uint32_t error = 0;
+  /* Calculate the window */
+  uint8_t pageStart = pos->origin_row/SSD1306_PAGE_HEIGHT;
+  uint8_t pageEnd = pageStart + (pos->size_rows/SSD1306_PAGE_HEIGHT) - 1;
+  /* Linear repeat pattern */
+  uint8_t colStart = pos->origin_col + instanceNum*pos->size_cols;
+  /* Add spacing */
+  colStart+= pos->repeat_spacing*instanceNum;
+  uint8_t colEnd = colStart + pos->size_cols - 1;
 
-    /* Set the window */
-    window->colStart = colStart;
-    window->colEnd = colEnd;
-    window->pageStart = pageStart;
-    window->pageEnd = pageEnd;
-    return error;
+  /* Set the window */
+  window->colStart = colStart;
+  window->colEnd = colEnd;
+  window->pageStart = pageStart;
+  window->pageEnd = pageEnd;
+  return error;
 }
 
 
@@ -427,49 +428,47 @@ uint32_t windowFromPos(display_position_s *const pos, uint8_t instanceNum, displ
 *  Error code of the operation
 *******************************************************************************/
 uint32_t create16x32(const uint8_t * inObject, uint8_t * outObject){
-    uint32_t error = 0;
+  uint32_t error = 0;
+  
+  uint8_t dataIndex;
+  for(dataIndex=0;dataIndex<16;dataIndex++){
+    uint8_t lowNibble  = (inObject[dataIndex] & 0x0F);
+    uint8_t highNibble  = (inObject[dataIndex] >> 4) & 0x0F;
     
-    uint8_t dataIndex;
-    for(dataIndex=0;dataIndex<16;dataIndex++){
-        uint8_t lowNibble  = (inObject[dataIndex] & 0x0F);
-        uint8_t highNibble  = (inObject[dataIndex] >> 4) & 0x0F;
-        
-        uint8_t bitIndex;
-        uint8_t newHighByte = 0;
-        uint8_t newLowByte = 0;
-        /* Iterate through each bit in the nibble*/
-        for(bitIndex=0; bitIndex<4; bitIndex++){
-            /* High byte */
-            bool bit = (highNibble >> bitIndex) & 0x01;
-            if(bit) {
-                /* Double in Rows */
-                newHighByte |= 0b11 << (bitIndex *2);
-            }
-            /* low byte */
-            bit = (lowNibble >> bitIndex) & 0x01;
-            if(bit) {
-                /* Double in Rows */
-                newLowByte |= (0b11 << (bitIndex *2));
-            }
-        }  
-        // TODO: refactor these out
-        #define INOBJECT_NUM_COLS 8
-        #define OUTOBJECT_NUM_COLS 16
-        /* Calculate Indices */
-        uint8_t l1 = dataIndex*2 +OUTOBJECT_NUM_COLS*(dataIndex/INOBJECT_NUM_COLS);
-        uint8_t l2 = l1 +1;
-        uint8_t h1 = dataIndex*2+ OUTOBJECT_NUM_COLS*((dataIndex/INOBJECT_NUM_COLS)+1);
-        uint8_t h2 = h1+1;
-        /* Double write Cols */
-        outObject[h1] = newHighByte;
-        outObject[h2] = newHighByte;
-        outObject[l1] = newLowByte;
-        outObject[l2] = newLowByte;
-//        printLn(&usb, "i:%i, B:0x%x, hNib:0x%x, lNib:0x%x,  H:0x%x, L:0x%x, h:%i,%i, l:%i,%i", i,inObject[i],highNibble, lowNibble, newHighByte,newLowByte,h1, h2, l1, l2);
-    }
-    
-    
-    return error;
+    uint8_t bitIndex;
+    uint8_t newHighByte = 0;
+    uint8_t newLowByte = 0;
+    /* Iterate through each bit in the nibble*/
+    for(bitIndex=0; bitIndex<4; bitIndex++){
+      /* High byte */
+      bool bit = (highNibble >> bitIndex) & 0x01;
+      if(bit) {
+        /* Double in Rows */
+        newHighByte |= 0b11 << (bitIndex *2);
+      }
+      /* low byte */
+      bit = (lowNibble >> bitIndex) & 0x01;
+      if(bit) {
+        /* Double in Rows */
+        newLowByte |= (0b11 << (bitIndex *2));
+      }
+    }  
+    // TODO: refactor these out
+    #define INOBJECT_NUM_COLS 8
+    #define OUTOBJECT_NUM_COLS 16
+    /* Calculate Indices */
+    uint8_t l1 = dataIndex*2 +OUTOBJECT_NUM_COLS*(dataIndex/INOBJECT_NUM_COLS);
+    uint8_t l2 = l1 +1;
+    uint8_t h1 = dataIndex*2+ OUTOBJECT_NUM_COLS*((dataIndex/INOBJECT_NUM_COLS)+1);
+    uint8_t h2 = h1+1;
+    /* Double write Cols */
+    outObject[h1] = newHighByte;
+    outObject[h2] = newHighByte;
+    outObject[l1] = newLowByte;
+    outObject[l2] = newLowByte;
+//      printLn(&usb, "i:%i, B:0x%x, hNib:0x%x, lNib:0x%x,  H:0x%x, L:0x%x, h:%i,%i, l:%i,%i", i,inObject[i],highNibble, lowNibble, newHighByte,newLowByte,h1, h2, l1, l2);
+  }
+  return error;
 }
 
 /*******************************************************************************
@@ -488,19 +487,19 @@ uint32_t create16x32(const uint8_t * inObject, uint8_t * outObject){
 *  Error code of the operation
 *******************************************************************************/
 uint32_t tokenizeNumber(uint16_t val, uint8_t *outArray){
-    uint32_t error = 0;
-    /* Calculate individidual digits */
-    uint8_t digit_100s = val/100;
-    val-= 100*digit_100s;
-    uint8_t digit_10s = val/ 10;
-    val-= 10*digit_10s;
-    uint8_t digit_1s = val;
-    /* Write to the array */
-    outArray[0] = digit_100s;
-    outArray[1] = digit_10s;
-    outArray[2] = digit_1s;
-    
-    return error;
+  uint32_t error = 0;
+  /* Calculate individidual digits */
+  uint8_t digit_100s = val/100;
+  val-= 100*digit_100s;
+  uint8_t digit_10s = val/ 10;
+  val-= 10*digit_10s;
+  uint8_t digit_1s = val;
+  /* Write to the array */
+  outArray[0] = digit_100s;
+  outArray[1] = digit_10s;
+  outArray[2] = digit_1s;
+  
+  return error;
 }
 
 /* [] END OF FILE */

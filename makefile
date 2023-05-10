@@ -23,8 +23,12 @@ all: $(LIBRARY)
 $(LIBRARY): $(OBJS)
 	$(AR) rcs $@ $^
 
-$(OBJ_DIR)/%.o: $(SOURCE_DIRS)/%.c
+$(OBJ_DIR)/%.o: $(SOURCE_DIRS)/%.c | $(OBJ_DIR)
 	$(CC) $(CFLAGS) -c -I$(INCLUDE_DIRS) -o $@ $<
+
+# Make the OBJ directory if it doesn't already exist
+$(OBJ_DIR):
+	mkdir -p $(OBJ_DIR)
 
 clean:
 	rm -rf $(OBJ_DIR)

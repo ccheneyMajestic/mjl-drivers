@@ -317,37 +317,37 @@ uint32_t uart_println(MLJ_UART_S *const state, const char * pszFmt){
 }
 
 
-/*******************************************************************************
-* Function Name: uart_printlnf()
-********************************************************************************
-* \brief
-*   Prints a formatted zero terminated string out on the uart followed by a newline and 
-* Carriage return 
-*
-* \param state [in/out]
-* Pointer to the state struct
-*
-* \param pszFmt [in]
-* Pointer to a zero-terminated string
-* 
-* \return
-*  Error code of the operation
-*******************************************************************************/
-uint32_t uart_printlnf(MLJ_UART_S* state, const char *pszFmt,...){
-  uint32_t error = 0;
-  if(!state->_init){error|=ERROR_INIT;}
-  if(!state->_running){error|=ERROR_STOPPED;}
-  if(!state->isLoggingEnabled){error|=ERROR_MODE;}
+// /*******************************************************************************
+// * Function Name: uart_printlnf()
+// ********************************************************************************
+// * \brief
+// *   Prints a formatted zero terminated string out on the uart followed by a newline and 
+// * Carriage return 
+// *
+// * \param state [in/out]
+// * Pointer to the state struct
+// *
+// * \param pszFmt [in]
+// * Pointer to a zero-terminated string
+// * 
+// * \return
+// *  Error code of the operation
+// *******************************************************************************/
+// uint32_t uart_printlnf(MLJ_UART_S* state, const char *pszFmt,...){
+//   uint32_t error = 0;
+//   if(!state->_init){error|=ERROR_INIT;}
+//   if(!state->_running){error|=ERROR_STOPPED;}
+//   if(!state->isLoggingEnabled){error|=ERROR_MODE;}
 
-  if(!error){
-    va_list args;
-    va_start(args, pszFmt);
-    error |= uart_printf(state, pszFmt, args);
-    error |= uart_print(state, "\r\n");
-    va_end(args);
-  }
-  return error;
-}
+//   if(!error){
+//     va_list args;
+//     va_start(args, pszFmt);
+//     error |= uart_printf(state, pszFmt, args);
+//     error |= uart_print(state, "\r\n");
+//     va_end(args);
+//   }
+//   return error;
+// }
 
 /*******************************************************************************
 * Function Name: uart_printf()
@@ -404,7 +404,7 @@ uint32_t uart_printf(MLJ_UART_S* state, const char *pszFmt,...) {
       }
       /* Format integer */
       else if(*pszFmt == 'd' || *pszFmt == 'i') {
-        int iVal = va_arg(args, int);
+        uint32_t iVal = va_arg(args, uint32_t);
         uint8_t i = 0;
         uint8_t buffer[25];
         do{
@@ -583,9 +583,7 @@ uint32_t uart_printf(MLJ_UART_S* state, const char *pszFmt,...) {
         continue;
       }
       /* End of string */
-      if(pszFmt == '\0'){
-        break;
-      }
+      if(pszFmt == NULL){break;}
     }
     va_end(args);
   }

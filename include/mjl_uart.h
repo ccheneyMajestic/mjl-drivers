@@ -83,7 +83,8 @@
   uint32_t uart_print(MLJ_UART_S *const state, const char * pszFmt);
   uint32_t uart_println(MLJ_UART_S *const state, const char * pszFmt);
   uint32_t uart_printf(MLJ_UART_S* state, const char *pszFmt,...);
-  uint32_t uart_printlnf(MLJ_UART_S* state, const char *pszFmt,...);
+  // uint32_t uart_printlnf(MLJ_UART_S* state, const char *pszFmt,...);
+  #define uart_printlnf(state,...)do{uart_printf(state,__VA_ARGS__); uart_println(state,"");}while(0)
 
   /* Utility Operations */
   uint32_t uart_printHeader(MLJ_UART_S* state, const char* name, const char *date, const char* time);

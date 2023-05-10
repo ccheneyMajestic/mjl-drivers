@@ -33,9 +33,10 @@
 #ifdef MJL_DEBUG
 //    #define MJL_DEBUG_LEDS           /* Test the onboard RGB LED */
 //    #define MJL_DEBUG_UART           /* Test the UART Connection */
+  #define MJL_DEBUG_SCREEN_CLEAR      /* Turn the screen on and clear it */
 //    #define MJL_DEBUG_SCREEN_ON           /* Turn the entire screen on */
 //    #define MJL_DEBUG_NUMBERS           /* Draw the numbers */
-    #define MJL_DEBUG_DRAW_UI          /* Draw the UI */
+//    #define MJL_DEBUG_DRAW_UI          /* Draw the UI */
     
     
     
@@ -276,124 +277,169 @@ int main(void){
             }
         }
     /* End MJL_DEBUG_UART */    
-    #elif defined MJL_DEBUG_SCREEN_ON           
-        /* Turn the entire screen on */
-        printHeader(&usb, "MJL_DEBUG_SCREEN_ON");
-        CyDelay(10);
-        print(&usb, "\r\n");
-        RGB_Write(&rgb, RGB_Blue);
-        
+    #elif defined MJL_DEBUG_SCREEN_CLEAR      
+      /* Turn the screen on and clear it */
+      printHeader(&usb, "MJL_DEBUG_SCREEN_CLEAR");
+      printLn(&usb, "* Press 'enter' to reset");
 
-                
+      
+      CyDelay(10);
+      print(&usb, "\r\n");
+      RGB_Write(&rgb, RGB_Blue);
 
-        for(;;) {
-            uint8_t readVal = 0;
-            usb.read(&readVal);
-            if(0 != readVal) {                
-                /* Reset on Enter */
-                if('\r' == readVal) {
-                    print(&usb, "\r\nResetting...");
-                    CyDelay(1000);
-                    CySoftwareReset();  
-                }
-                else if (' ' == readVal) {
-                    printLn(&usb, "Writing to display");
-                    RGB_G_Toggle(&rgb);
-                    SSD1306_start();
-                }
-                else if('1' == readVal) {
-                    printLn(&usb, "Display all on");
-                    RGB_R_Toggle(&rgb);
-                    uint8_t cmdWord = SSD1306_CMD_ALL_ON;
-                    SSD1306_writeCommandArray(&cmdWord, 1);
-                }
-                else if('2' == readVal) {
-                    printLn(&usb, "Display data");
-                    RGB_R_Toggle(&rgb);
-                    uint8_t cmdWord = SSD1306_CMD_ALL_RAM;
-                    SSD1306_writeCommandArray(&cmdWord, 1);
-                }
-                else if('3' == readVal) {
-                    printLn(&usb, "Writing display data");
-                    RGB_G_Toggle(&rgb);
-                    uint8_t dataArray[128] = {
-                        0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,
-                        0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,
-                        0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,
-                        0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,
-                        0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,
-                        0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,
-                        0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,
-                        0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,
-                        0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,
-                        0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,
-                        0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,
-                        0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,
-                        0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,
-                        0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,
-                        0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,
-                        0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,
-                    };
-                    SSD1306_writeDataArray(dataArray, 1);
-                }
-                else if('4' == readVal) {
-                    printLn(&usb, "Clearing Display data");
-                    RGB_G_Toggle(&rgb);
-                    uint8_t dataArray[128] = {
-                        0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,
-                        0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,
-                        0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,
-                        0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,
-                        0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,
-                        0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,
-                        0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,
-                        0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,
-                        0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,
-                        0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,
-                        0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,
-                        0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,
-                        0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,
-                        0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,
-                        0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,
-                        0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,
-                    };
-                    uint8_t i;
-                    for(i=0; i < 8; i++){
-                        SSD1306_writeDataArray(dataArray, 128);
-                    }
-                    
-                }
-                else if('5' == readVal) {
-                    uint8_t columnStart = 15;
-                    uint8_t columnEnd = 30;
-                    uint8_t pageStart = 1;
-                    uint8_t pageEnd = 2;
-                    uint8_t dataArray[6] = {
-                        SSD1306_CMD_COLUMN_ADDR, columnStart, columnEnd,
-                        SSD1306_CMD_PAGE_ADDR, pageStart, pageEnd
-                    };
-                    SSD1306_writeCommandArray(dataArray, 6);
-                }
-                else if('0' == readVal) {
-                    uint8_t columnStart = 0;
-                    uint8_t columnEnd = 7;
-                    uint8_t pageStart = 0;
-                    uint8_t pageEnd = 1;
-                    uint8_t dataArray[6] = {
-                        SSD1306_CMD_COLUMN_ADDR, columnStart, columnEnd,
-                        SSD1306_CMD_PAGE_ADDR, pageStart, pageEnd
-                    };
-                    SSD1306_writeCommandArray(dataArray, 6);
-                }
-                else if('6' == readVal) {
-                    SSD1306_writeDataArray((uint8_t *)one_8x16, 16);
-                }
-                else if('7' == readVal) {
-                    SSD1306_writeDataArray((uint8_t *)two_8x16, 16);
-                }
-            }
-
+      SSD1306_clearScreen();
+      uint8_t columnStart = 0;
+      uint8_t columnEnd = 7;
+      uint8_t pageStart = 0;
+      uint8_t pageEnd = 1;
+      uint8_t dataArray[6] = {
+        SSD1306_CMD_COLUMN_ADDR, columnStart, columnEnd,
+        SSD1306_CMD_PAGE_ADDR, pageStart, pageEnd
+      };
+      SSD1306_writeCommandArray(dataArray, 6);
+      SSD1306_writeDataArray((uint8_t *)one_8x16, 16);
+      
+      for(;;) {
+        uint8_t readVal = 0;
+        usb.read(&readVal);
+        if(0 != readVal) {                
+          /* Reset on Enter */
+          if('\r' == readVal) {
+            print(&usb, "\r\nResetting...");
+            CyDelay(1000);
+            CySoftwareReset();  
+          }
         }
+      }
+    #elif defined MJL_DEBUG_SCREEN_ON           
+      /* Turn the entire screen on */
+      printHeader(&usb, "MJL_DEBUG_SCREEN_ON");
+      printLn(&usb, "* Press 'enter' to reset");
+      printLn(&usb, "* Press ' ' to Start the display");
+      printLn(&usb, "* Press '0' to issue ALL ON command");
+      printLn(&usb, "* Press '1' to issue DATA command");
+      printLn(&usb, "* Press '2' to write the data ON ");
+      printLn(&usb, "* Press '3' to write the data OFF");
+      printLn(&usb, "* Press '4' to Set the display window to 0,0");
+      printLn(&usb, "* Press '5' to set the window");
+      printLn(&usb, "* Press '6' to write out a '1'");
+      printLn(&usb, "* Press '7' to Write out a '2'");
+      
+      CyDelay(10);
+      print(&usb, "\r\n");
+      RGB_Write(&rgb, RGB_Blue);
+
+      for(;;) {
+        uint8_t readVal = 0;
+        usb.read(&readVal);
+        if(0 != readVal) {                
+          /* Reset on Enter */
+          if('\r' == readVal) {
+            print(&usb, "\r\nResetting...");
+            CyDelay(1000);
+            CySoftwareReset();  
+          }
+          else if (' ' == readVal) {
+            printLn(&usb, "Writing to display");
+            RGB_G_Toggle(&rgb);
+            SSD1306_start();
+          }
+
+          else if('0' == readVal) {
+            printLn(&usb, "Display all on");
+            RGB_R_Toggle(&rgb);
+            uint8_t cmdWord = SSD1306_CMD_ALL_ON;
+            SSD1306_writeCommandArray(&cmdWord, 1);
+          }
+          else if('1' == readVal) {
+            printLn(&usb, "Display data");
+            RGB_R_Toggle(&rgb);
+            uint8_t cmdWord = SSD1306_CMD_ALL_RAM;
+            SSD1306_writeCommandArray(&cmdWord, 1);
+          }
+          else if('2' == readVal) {
+            printLn(&usb, "Writing display data");
+            RGB_G_Toggle(&rgb);
+            uint8_t dataArray[128] = {
+                0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,
+                0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,
+                0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,
+                0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,
+                0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,
+                0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,
+                0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,
+                0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,
+                0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,
+                0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,
+                0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,
+                0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,
+                0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,
+                0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,
+                0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,
+                0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,
+            };
+            SSD1306_writeDataArray(dataArray, 1);
+          }
+          else if('3' == readVal) {
+            printLn(&usb, "Clearing Display data");
+            RGB_G_Toggle(&rgb);
+            SSD1306_clearScreen();
+//            uint8_t dataArray[128] = {
+//              0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,
+//              0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,
+//              0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,
+//              0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,
+//              0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,
+//              0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,
+//              0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,
+//              0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,
+//              0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,
+//              0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,
+//              0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,
+//              0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,
+//              0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,
+//              0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,
+//              0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,
+//              0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,
+//            };
+//            uint8_t i;
+//            for(i=0; i < 8; i++){
+//              SSD1306_writeDataArray(dataArray, 128);
+//            }
+          }
+          else if('4' == readVal) {
+            printLn(&usb, "Set window to 0-7, 0-1");
+            uint8_t columnStart = 0;
+            uint8_t columnEnd = 7;
+            uint8_t pageStart = 0;
+            uint8_t pageEnd = 1;
+            uint8_t dataArray[6] = {
+              SSD1306_CMD_COLUMN_ADDR, columnStart, columnEnd,
+              SSD1306_CMD_PAGE_ADDR, pageStart, pageEnd
+            };
+            SSD1306_writeCommandArray(dataArray, 6);
+          }
+          else if('5' == readVal) {
+            printLn(&usb, "Set window to 15-30, 1-2");
+            uint8_t columnStart = 15;
+            uint8_t columnEnd = 30;
+            uint8_t pageStart = 1;
+            uint8_t pageEnd = 2;
+            uint8_t dataArray[6] = {
+                SSD1306_CMD_COLUMN_ADDR, columnStart, columnEnd,
+                SSD1306_CMD_PAGE_ADDR, pageStart, pageEnd
+            };
+            SSD1306_writeCommandArray(dataArray, 6);
+          }
+
+          else if('6' == readVal) {
+            SSD1306_writeDataArray((uint8_t *)one_8x16, 16);
+          }
+          else if('7' == readVal) {
+            SSD1306_writeDataArray((uint8_t *)two_8x16, 16);
+          }
+        }
+      }
     /* End MJL_DEBUG_SCREEN_ON */
     #elif defined MJL_DEBUG_NUMBERS           
         /* Draw the numbers */
@@ -622,14 +668,14 @@ uint32_t SSD1306_start(void) {
     pin_OLED_RESET_Write(SSD1306_RESET_DISASSERT);
     CyDelay(1);
     /* Enable the display */
-    #define SSD_START_ARRAY_LEN 10
+    #define SSD_START_ARRAY_LEN 5
     uint8_t startCommands[SSD_START_ARRAY_LEN] = {
         SSD1306_CMD_CHARGE_PUMP, SSD1306_CMD_CHARGE_PUMP_ON,  /* Enable the charge pump */
         SSD1306_CMD_ADDRESS_MODE, SSD1306_CMD_ADDRESS_MODE_HORIZONTAL, /* Set to horizontal addressing */
         SSD1306_CMD_ON /* Wakeup from sleep */
     };
     error |= SSD1306_writeCommandArray(startCommands, SSD_START_ARRAY_LEN);
-    error |= SSD1306_clearScreen();
+//    error |= SSD1306_clearScreen();
 
     return error;
 }

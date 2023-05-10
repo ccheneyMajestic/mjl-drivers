@@ -14,6 +14,7 @@
     <Group key="Pin">
       <Data key="43ec2fa1-bf22-4b71-9477-b6ca7b97f0b0/23b8206d-1c77-4e61-be4a-b4037d5de5fc" value="uartUsb_tx" />
       <Data key="43ec2fa1-bf22-4b71-9477-b6ca7b97f0b0/78e33e5d-45ea-4b75-88d5-73274e8a7ce4" value="uartUsb_rx" />
+      <Data key="e851a3b9-efb8-48be-bbb8-b303b216c393" value="pin_LED_G" />
     </Group>
   </Group>
   <Group key="FlashSecurity">
@@ -3560,6 +3561,11 @@
     <Group key="43ec2fa1-bf22-4b71-9477-b6ca7b97f0b0/78e33e5d-45ea-4b75-88d5-73274e8a7ce4">
       <Group key="0">
         <Data key="Port Format" value="1,4" />
+      </Group>
+    </Group>
+    <Group key="e851a3b9-efb8-48be-bbb8-b303b216c393">
+      <Group key="0">
+        <Data key="Port Format" value="3,6" />
       </Group>
     </Group>
   </Group>

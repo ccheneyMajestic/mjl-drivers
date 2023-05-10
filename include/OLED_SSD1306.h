@@ -51,6 +51,9 @@
   #define SSD1306_CMD_COLUMN_ADDR             (0x21) /* Set the column address */
   #define SSD1306_CMD_PAGE_ADDR               (0x22) /* Set the page address */
 
+  #define SSD1306_DELAY_US_RESET              (100) /* Reset time in [µs]*/
+  #define SSD1306_DELAY_US_DC                 (1) /* Time in [µs] for data command*/
+
 
 
   #define DISPLAY_LEN_16x32                   (64)
@@ -99,7 +102,7 @@
     uint32_t (*fn_spi_writeArrayBlocking) (uint8_t slaveId, uint8_t *const cmdArray, uint16_t len);
     void (*fn_pin_reset_write) (uint8_t val);
     void (*fn_pin_dataCommand_write) (uint8_t val);
-    void (*fn_delayMs)(uint32_t milliseconds);
+    void (*fn_delayUs)(uint32_t microsecond);
     display_window_s fullWindow;
     uint8_t spi_slaveId;
     /* Object function pointer */
@@ -117,7 +120,7 @@
     uint32_t (*fn_spi_writeArrayBlocking) (uint8_t slaveId, uint8_t *const cmdArray, uint16_t len);
     void (*fn_pin_reset_write) (uint8_t val);
     void (*fn_pin_dataCommand_write) (uint8_t val);
-    void (*fn_delayMs)(uint32_t milliseconds);
+    void (*fn_delayUs)(uint32_t microsecond);
     display_window_s fullWindow;
     uint8_t spi_slaveId;
     /* Nested objects */
@@ -141,6 +144,7 @@
   /* Required Functions */
   uint32_t SSD1306_init(ssd1306_state_s *const state, ssd1306_cfg_s *const cfg);
   uint32_t SSD1306_start(ssd1306_state_s *const state);
+  uint32_t SSD1306_stop(ssd1306_state_s *const state);
   uint32_t SSD1306_writeCommandArray(ssd1306_state_s *const state, uint8_t * cmdArray, uint8_t len);
   uint32_t SSD1306_writeDataArray(ssd1306_state_s *const state, uint8_t * dataArray, uint16_t len);
   uint32_t SSD1306_setWindow(ssd1306_state_s *const state, display_window_s *const window);

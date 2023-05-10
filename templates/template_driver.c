@@ -108,3 +108,4 @@ uint32_t template_stop(MLJ_TEMPLATE_S *const state){
   }
   return error;
 }
+/* [] END OF FILE */

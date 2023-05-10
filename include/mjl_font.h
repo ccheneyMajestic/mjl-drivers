@@ -30,12 +30,12 @@
   /***************************************
   * External Vars
   ***************************************/
-    extern const uint8_t* digits_8x16[10];
-    extern const uint8_t battery_1bar[UI_ICON_BATTERY_LEN];
-    extern const uint8_t historyOutline[UI_ICON_HISTORY_LEN];
-    extern const uint8_t resetOutline[UI_ICON_RESET_LEN];
-    extern const uint8_t* maxText_bitmaps[3];
-    extern const uint8_t* kgText_bitmaps[2];
+  extern const uint8_t* digits_8x16[10];
+  extern const uint8_t* alphabet_8x16[26];
+  extern const uint8_t battery_1bar[UI_ICON_BATTERY_LEN];
+  extern const uint8_t historyOutline[UI_ICON_HISTORY_LEN];
+  extern const uint8_t resetOutline[UI_ICON_RESET_LEN];
+
   /***************************************
   * Structures
   ***************************************/
