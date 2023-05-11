@@ -161,7 +161,7 @@ uint32_t SSD1306_writeCommandArray(ssd1306_state_s *const state, uint8_t * cmdAr
 * \return
 *  Error code of the operation
 *******************************************************************************/
-uint32_t SSD1306_writeDataArray(ssd1306_state_s *const state, uint8_t * dataArray, uint16_t len) {
+uint32_t SSD1306_writeDataArray(ssd1306_state_s *const state, const uint8_t * dataArray, uint16_t len) {
     uint32_t error = 0;
     if(!state->_isInitialized){error|=ERROR_INIT;}
     if(!error) {
@@ -343,6 +343,9 @@ uint32_t SSD1306_setDigits_16x32(ssd1306_state_s *const state, uint8_t *digits, 
 * \brief
 *   Set a series of letters at a position
 *
+* \param state [in/out]
+*   Pointer to the state structure 
+* 
 * \param letters [in]
 *  Pointer to array that contains the information for each letter to set 
 * 
@@ -373,6 +376,80 @@ uint32_t SSD1306_setLetters(ssd1306_state_s *const state, const uint8_t **letter
   }
   return error;
 }
+
+/*******************************************************************************
+* Function Name: SSD1306_renderString()
+********************************************************************************
+* \brief
+*   Set a string in a giving position -- Only use uppercase for now
+*
+* \param state [in/out]
+*   Pointer to the state structure 
+
+* \param str [in]
+*  Zero terminated string 
+* 
+* \param pos [in]
+* Position object of the letters
+*
+* \return
+*  Error code of the operation
+*******************************************************************************/
+uint32_t SSD1306_renderString(ssd1306_state_s *const state, display_text_s *const text){
+  uint32_t error = 0;
+  /* Get the length of the string */
+  uint8_t len = strlen(text->data);
+  if(len > text->pos.repeat_num){error|=ERROR_PARAM;} /* Ensure string will fit*/
+  if(text->pos.repeat_num > ROW_NUM_CHARS){error|=ERROR_VAL;}
+
+  if(!error){
+    const uint8_t* letters[ROW_NUM_CHARS];
+    for(uint8_t i=0; i<len; i++){
+      uint8_t val = text->data[i];
+      if(val>='A' && val<='Z'){letters[i] = alphabet_8x16[(val-ASCII_OFFSET_LETTER)];}
+      else if(val>='0' && val<='9'){letters[i] = digits_8x16[(val-ASCII_OFFSET_DIGIT)];}
+      else if(' '== val){letters[i] = specialChars_8x16[UI_CHARS_IDX_SPACE];}
+      else{
+        error|=ERROR_VAL;
+        break;
+      }
+    }
+    if(!error){error|= SSD1306_setLetters(state, letters ,&text->pos);}
+  }
+  return error;
+}
+/*******************************************************************************
+* Function Name: SSD1306_setString()
+********************************************************************************
+* \brief
+*   Set a string in a giving position -- Only use uppercase for now
+*
+* \param state [in/out]
+*   Pointer to the state structure 
+
+* \param str [in]
+*  Zero terminated string 
+* 
+* \param pos [in]
+* Position object of the letters
+*
+* \return
+*  Error code of the operation
+*******************************************************************************/
+uint32_t SSD1306_setIcon(ssd1306_state_s *const state, display_icon_s *const icon){
+  uint32_t error = 0;
+  display_window_s window;
+  error |= windowFromPos(&icon->pos, 0, &window);
+  if(!error){error|=SSD1306_setWindow(state, &window);}
+  if(!error){
+    uint16_t len = (icon->pos.size_cols * icon->pos.size_rows) / SSD1306_PAGE_HEIGHT; 
+    error|=SSD1306_writeDataArray(state, icon->data, len);
+  }
+  
+  return error;
+}
+
+
 
 /*******************************************************************************
 * Function Name: windowFromPos()
@@ -489,15 +566,18 @@ uint32_t create16x32(const uint8_t * inObject, uint8_t * outObject){
 uint32_t tokenizeNumber(uint16_t val, uint8_t *outArray){
   uint32_t error = 0;
   /* Calculate individidual digits */
+  uint8_t digit_1000s = val/1000;
+  val-= 1000*digit_1000s;
   uint8_t digit_100s = val/100;
   val-= 100*digit_100s;
   uint8_t digit_10s = val/ 10;
   val-= 10*digit_10s;
   uint8_t digit_1s = val;
   /* Write to the array */
-  outArray[0] = digit_100s;
-  outArray[1] = digit_10s;
-  outArray[2] = digit_1s;
+  outArray[0] = digit_1000s;
+  outArray[1] = digit_100s;
+  outArray[2] = digit_10s;
+  outArray[3] = digit_1s;
   
   return error;
 }

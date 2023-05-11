@@ -27,14 +27,26 @@
   #define UI_ICON_BATTERY_LEN                 (16) /* number of bytes in the battery icon */
   #define UI_ICON_HISTORY_LEN                 (48) /* number of bytes in the history icon */
   #define UI_ICON_RESET_LEN                   (48) /* number of bytes in the reset icon */
+
+  #define UI_CHARS_IDX_SPACE                  (0) /* Index of the space character in specialChars[]*/
   /***************************************
   * External Vars
   ***************************************/
   extern const uint8_t* digits_8x16[10];
   extern const uint8_t* alphabet_8x16[26];
-  extern const uint8_t battery_1bar[UI_ICON_BATTERY_LEN];
-  extern const uint8_t historyOutline[UI_ICON_HISTORY_LEN];
-  extern const uint8_t resetOutline[UI_ICON_RESET_LEN];
+  extern const uint8_t* specialChars_8x16[10];
+
+  extern const uint8_t icon_batteryOutline[UI_ICON_BATTERY_LEN];
+  extern const uint8_t icon_battery_1bar[UI_ICON_BATTERY_LEN];
+  extern const uint8_t icon_blueTooth[16]; 
+  extern const uint8_t icon_charging[16]; 
+  extern const uint8_t icon_downArrow[16];  
+  extern const uint8_t icon_upArrow[16]; 
+  extern const uint8_t icon_colon[4];   
+  extern const uint8_t icon_decimalPoint[4];
+  extern const uint8_t icon_history[UI_ICON_HISTORY_LEN];
+  extern const uint8_t icon_reset[UI_ICON_RESET_LEN];
+  extern const uint8_t icon_back[UI_ICON_RESET_LEN];
 
   /***************************************
   * Structures

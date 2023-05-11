@@ -57,10 +57,10 @@
 
 
   #define DISPLAY_LEN_16x32                   (64)
-
-
-  #define SPI_ID_OLED             (0) /* Slave ID of the OLED */
-
+  #define CHAR_NUM_COLS                       (8) /* Number of columns in a character*/
+  #define ROW_NUM_CHARS                       (SSD1306_NUM_COLS/CHAR_NUM_COLS) /* Maximum number of characters per row*/
+  #define ASCII_OFFSET_LETTER                 ('A') /* Use to map ascii to alphabet offset */
+  #define ASCII_OFFSET_DIGIT                  ('0') /* Use to map ascii to alphabet offset */
   
 
   /***************************************
@@ -80,26 +80,38 @@
 
   /* Control the display window */
   typedef struct {
-      uint8_t pageStart;
-      uint8_t pageEnd;
-      uint8_t colStart;
-      uint8_t colEnd;  
+    uint8_t pageStart;
+    uint8_t pageEnd;
+    uint8_t colStart;
+    uint8_t colEnd;  
   } display_window_s;
 
   typedef struct {
-      uint8_t origin_col;
-      uint8_t origin_row;
-      uint8_t size_cols;
-      uint8_t size_rows;
-      uint8_t repeat_num;
-      uint8_t repeat_spacing;
+    uint8_t origin_col;
+    uint8_t origin_row;
+    uint8_t size_cols;
+    uint8_t size_rows;
+    uint8_t repeat_num;
+    uint8_t repeat_spacing;
   } display_position_s;
+
+  /* Icons */
+  typedef struct {
+    display_position_s pos;
+    const uint8_t * data;
+  }display_icon_s;
+
+  /* Strings */
+  typedef struct {
+    display_position_s pos;
+    char data[ROW_NUM_CHARS];
+  }display_text_s;
 
 
   /* Object Configuration Structure */
   typedef struct{
     /* HAL Function Pointers */
-    uint32_t (*fn_spi_writeArrayBlocking) (uint8_t slaveId, uint8_t *const cmdArray, uint16_t len);
+    uint32_t (*fn_spi_writeArrayBlocking) (uint8_t slaveId, const uint8_t * cmdArray, uint16_t len);
     void (*fn_pin_reset_write) (uint8_t val);
     void (*fn_pin_dataCommand_write) (uint8_t val);
     void (*fn_delayUs)(uint32_t microsecond);
@@ -117,7 +129,7 @@
     uint32_t output;
     uint32_t error;
     /* Input parameters */
-    uint32_t (*fn_spi_writeArrayBlocking) (uint8_t slaveId, uint8_t *const cmdArray, uint16_t len);
+    uint32_t (*fn_spi_writeArrayBlocking) (uint8_t slaveId, const uint8_t * cmdArray, uint16_t len);
     void (*fn_pin_reset_write) (uint8_t val);
     void (*fn_pin_dataCommand_write) (uint8_t val);
     void (*fn_delayUs)(uint32_t microsecond);
@@ -146,13 +158,17 @@
   uint32_t SSD1306_start(ssd1306_state_s *const state);
   uint32_t SSD1306_stop(ssd1306_state_s *const state);
   uint32_t SSD1306_writeCommandArray(ssd1306_state_s *const state, uint8_t * cmdArray, uint8_t len);
-  uint32_t SSD1306_writeDataArray(ssd1306_state_s *const state, uint8_t * dataArray, uint16_t len);
+  uint32_t SSD1306_writeDataArray(ssd1306_state_s *const state, const uint8_t * dataArray, uint16_t len);
   uint32_t SSD1306_setWindow(ssd1306_state_s *const state, display_window_s *const window);
   uint32_t SSD1306_clearScreen(ssd1306_state_s *const state);
   uint32_t SSD1306_drawDigit_8x16(ssd1306_state_s *const state, uint8_t num);
   uint32_t SSD1306_setDigits(ssd1306_state_s *const state, uint8_t* digits, display_position_s *const pos);
   uint32_t SSD1306_setDigits_16x32(ssd1306_state_s *const state, uint8_t *digits, display_position_s *const pos);
   uint32_t SSD1306_setLetters(ssd1306_state_s *const state, const uint8_t **letters, display_position_s *const pos);
+  uint32_t SSD1306_renderString(ssd1306_state_s *const state, display_text_s *const text);
+  uint32_t SSD1306_setIcon(ssd1306_state_s *const state, display_icon_s *const icon);
+
+
 
 
 
