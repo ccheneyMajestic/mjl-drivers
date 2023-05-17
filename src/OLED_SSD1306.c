@@ -381,7 +381,7 @@ uint32_t SSD1306_setLetters(ssd1306_state_s *const state, const uint8_t **letter
 * Function Name: SSD1306_renderString()
 ********************************************************************************
 * \brief
-*   Set a string in a giving position -- Only use uppercase for now
+*   Set a string in a giving position - all chars map to uppercase 
 *
 * \param state [in/out]
 *   Pointer to the state structure 
@@ -406,7 +406,8 @@ uint32_t SSD1306_renderString(ssd1306_state_s *const state, display_text_s *cons
     const uint8_t* letters[ROW_NUM_CHARS];
     for(uint8_t i=0; i<len; i++){
       uint8_t val = text->data[i];
-      if(val>='A' && val<='Z'){letters[i] = alphabet_8x16[(val-ASCII_OFFSET_LETTER)];}
+      if(val>='A' && val<='Z'){letters[i] = alphabet_8x16[(val-ASCII_OFFSET_LETTER_CAP)];}
+      else if(val>='a' && val<='z'){letters[i] = alphabet_8x16[(val-ASCII_OFFSET_LETTER_LOWER)];}
       else if(val>='0' && val<='9'){letters[i] = digits_8x16[(val-ASCII_OFFSET_DIGIT)];}
       else if(' '== val){letters[i] = specialChars_8x16[UI_CHARS_IDX_SPACE];}
       else{
@@ -419,19 +420,16 @@ uint32_t SSD1306_renderString(ssd1306_state_s *const state, display_text_s *cons
   return error;
 }
 /*******************************************************************************
-* Function Name: SSD1306_setString()
+* Function Name: SSD1306_setIcon()
 ********************************************************************************
 * \brief
-*   Set a string in a giving position -- Only use uppercase for now
+*   Sets an icon in a given position
 *
 * \param state [in/out]
 *   Pointer to the state structure 
 
-* \param str [in]
-*  Zero terminated string 
-* 
-* \param pos [in]
-* Position object of the letters
+* \param icon [in]
+*  Pointer to the icon strcuture 
 *
 * \return
 *  Error code of the operation
@@ -449,6 +447,37 @@ uint32_t SSD1306_setIcon(ssd1306_state_s *const state, display_icon_s *const ico
   return error;
 }
 
+
+/*******************************************************************************
+* Function Name: SSD1306_clearIcon()
+********************************************************************************
+* \brief
+*   Clears an icon in a given position
+*
+* \param state [in/out]
+*   Pointer to the state structure 
+
+* \param icon [in]
+*  Icon to clear
+*
+* \return
+*  Error code of the operation
+*******************************************************************************/
+uint32_t SSD1306_clearIcon(ssd1306_state_s *const state, display_icon_s *const icon){
+  uint32_t error = 0;
+  display_window_s window;
+  error |= windowFromPos(&icon->pos, 0, &window);
+  if(!error){error|=SSD1306_setWindow(state, &window);}
+  if(!error){
+    uint16_t len = (icon->pos.size_cols * icon->pos.size_rows) / SSD1306_PAGE_HEIGHT; 
+    // TODO: Hacky way of avoiding using heap 
+    uint8_t blankPage[SSD1306_NUM_COLS];
+    memset(blankPage, 0, SSD1306_NUM_COLS);
+    error|=SSD1306_writeDataArray(state, blankPage, len);
+  }
+  
+  return error;
+}
 
 
 /*******************************************************************************

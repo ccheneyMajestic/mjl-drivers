@@ -59,7 +59,8 @@
   #define DISPLAY_LEN_16x32                   (64)
   #define CHAR_NUM_COLS                       (8) /* Number of columns in a character*/
   #define ROW_NUM_CHARS                       (SSD1306_NUM_COLS/CHAR_NUM_COLS) /* Maximum number of characters per row*/
-  #define ASCII_OFFSET_LETTER                 ('A') /* Use to map ascii to alphabet offset */
+  #define ASCII_OFFSET_LETTER_CAP             ('A') /* Use to map capital ascii to alphabet offset */
+  #define ASCII_OFFSET_LETTER_LOWER           ('a') /* Use to map lowercase ascii to alphabet offset */
   #define ASCII_OFFSET_DIGIT                  ('0') /* Use to map ascii to alphabet offset */
   
 
@@ -99,12 +100,16 @@
   typedef struct {
     display_position_s pos;
     const uint8_t * data;
+    bool wasIconUpdated;
+    bool shouldIconRender;
   }display_icon_s;
 
   /* Strings */
   typedef struct {
     display_position_s pos;
     char data[ROW_NUM_CHARS];
+    bool wasTextUpdated;
+    bool shouldTextRender;
   }display_text_s;
 
 
@@ -167,6 +172,7 @@
   uint32_t SSD1306_setLetters(ssd1306_state_s *const state, const uint8_t **letters, display_position_s *const pos);
   uint32_t SSD1306_renderString(ssd1306_state_s *const state, display_text_s *const text);
   uint32_t SSD1306_setIcon(ssd1306_state_s *const state, display_icon_s *const icon);
+  uint32_t SSD1306_clearIcon(ssd1306_state_s *const state, display_icon_s *const icon);
 
 
 
