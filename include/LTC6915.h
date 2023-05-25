@@ -59,11 +59,11 @@
     void (*fn_pin_D1_Write) (uint8_t val);    /* Generic function to write D1 pin state in parallel mode */
     void (*fn_pin_D2_Write) (uint8_t val);    /* Generic function to write D2 pin state in parallel mode */
     void (*fn_pin_D3_Write) (uint8_t val);    /* Generic function to write D3 pin state in parallel mode */
-    uint32_t (*fn_spiWriteArray) (uint8_t slaveId, uint8_t * cmdArray, uint16_t len); /* SPI write function for parallel mode */
+    uint32_t (*fn_spiWriteArray) (uint8_t slaveId, const uint8_t * cmdArray, uint16_t len); /* SPI write function for parallel mode */
     LTC6915_MODE_T mode;    /* The mode of the device */
     LTC6915_GAIN_T gainWord;   /* Gain word of the amp */
     uint8_t slaveId; 
-  } LTC6915_cfg_S;
+  } LTC6915_cfg_s;
 
 
   /* State Object */
@@ -72,7 +72,7 @@
     void (*fn_pin_D1_Write) (uint8_t val);    /* Generic function to write D1 pin state in parallel mode */
     void (*fn_pin_D2_Write) (uint8_t val);    /* Generic function to write D2 pin state in parallel mode */
     void (*fn_pin_D3_Write) (uint8_t val);    /* Generic function to write D3 pin state in parallel mode */
-    uint32_t (*fn_spiWriteArray) (uint8_t slaveId, uint8_t * cmdArray, uint16_t len); /* SPI write function for parallel mode */
+    uint32_t (*fn_spiWriteArray) (uint8_t slaveId, const uint8_t * cmdArray, uint16_t len); /* SPI write function for parallel mode */
 
     LTC6915_MODE_T mode;    /* The mode of the device */
     LTC6915_GAIN_T gainWord;   /* Gain word of the amp */
@@ -81,12 +81,12 @@
     bool _running;  /* Is the device running */
   } LTC6915_S;
 
-  extern const LTC6915_cfg_S ltc6915_default;
+  extern const LTC6915_cfg_s ltc6915_default;
   /***************************************
   * Function declarations 
   ***************************************/
   /* State operations */
-  uint32_t ltc6915_init(LTC6915_S *const state, LTC6915_cfg_S *const cfg);
+  uint32_t ltc6915_init(LTC6915_S *const state, LTC6915_cfg_s *const cfg);
   uint32_t ltc6915_start(LTC6915_S *const state);
   uint32_t ltc6915_stop(LTC6915_S *const state);
   uint32_t ltc6915_setGainWord(LTC6915_S *const state, LTC6915_GAIN_T gainWord);
@@ -95,7 +95,9 @@
   uint32_t ltc6915_wordFromValue(uint16_t gain, LTC6915_GAIN_T *const gainWord);
   bool ltc6915_isValidGainWord(uint8_t gainWord);
   bool ltc6915_isValidGainVal(uint8_t gainValue);
-    
+  uint32_t ltc6915_getNextGainWord(LTC6915_S *const state, LTC6915_GAIN_T *const nextWord);
+  uint32_t ltc6915_getPreviousGainWord(LTC6915_S *const state, LTC6915_GAIN_T *const prevWord);
+
 #endif /* LTC6915_H */
     
 

@@ -13,7 +13,7 @@
 #include "LTC6915.h" 
 
 /* Default configuration structure */
-const LTC6915_cfg_S ltc6915_default = {
+const LTC6915_cfg_s ltc6915_default = {
   .fn_pin_D0_Write = NULL, 
   .fn_pin_D1_Write = NULL,
   .fn_pin_D2_Write = NULL,
@@ -39,7 +39,7 @@ const LTC6915_cfg_S ltc6915_default = {
 * \return
 *  Error code of the operation
 *******************************************************************************/
-uint32_t ltc6915_init(LTC6915_S *const state, LTC6915_cfg_S *const cfg){
+uint32_t ltc6915_init(LTC6915_S *const state, LTC6915_cfg_s *const cfg){
   uint32_t error = 0;
   /* Verify Communication Functions */
   if (LTC6915_MODE_SERIAL == cfg->mode){
@@ -57,7 +57,7 @@ uint32_t ltc6915_init(LTC6915_S *const state, LTC6915_cfg_S *const cfg){
   /* Unknown mode */
   else {error |= ERROR_MODE;}
   /* Check the default gain */
-  error |= ltc6915_isValidGainWord(cfg->gainWord) ? ERROR_VAL : ERROR_NONE;
+  if(!ltc6915_isValidGainWord(cfg->gainWord)){error|=ERROR_VAL;}
   /* Valid Inputs */
   if(!error) {
     /* Copy into configuration structure */
@@ -170,6 +170,7 @@ uint32_t ltc6915_stop(LTC6915_S *const state) {
         state->fn_pin_D3_Write((bool) (gainWord & LTC6915_MASK_D3));
       }
       else{error|=ERROR_PARAM;} 
+      if(!error){state->gainWord = gainWord;}
     }
     return error;
   }
@@ -194,8 +195,8 @@ uint32_t ltc6915_stop(LTC6915_S *const state) {
 *******************************************************************************/
 uint32_t ltc6915_valueFromWord(LTC6915_GAIN_T gainWord, uint16_t *const result){
   uint32_t error = 0;
-  error |= ltc6915_isValidGainWord(gainWord);
-  uint8_t val = 0;
+  if(!ltc6915_isValidGainWord(gainWord)){error|=ERROR_VAL;}
+  uint16_t val = 0;
   if(!error){
     if(gainWord == LTC6915_GAIN_0){val = 0;}
     else {val = 1 << (gainWord - 1);}
@@ -208,7 +209,7 @@ uint32_t ltc6915_valueFromWord(LTC6915_GAIN_T gainWord, uint16_t *const result){
 
   
 /*******************************************************************************
-* Function Name: ltc6915_valueFromWord()
+* Function Name: ltc6915_wordFromValue()
 ********************************************************************************
 * \brief
 *  Produces the gain value from the gain word
@@ -254,15 +255,8 @@ uint32_t ltc6915_valueFromWord(LTC6915_GAIN_T gainWord, uint16_t *const result){
 * \return
 *  Result of the operation
 *******************************************************************************/
-bool ltc6915_isValidGainWord(uint8_t gainWord){
-  bool isValidGainWord = false;
-  for(uint8_t i=LTC6915_GAIN_0; i<LTC6915_GAIN_4096; i++){
-    if(gainWord == i){
-      isValidGainWord = true;
-      break;
-    }
-  }
-  return isValidGainWord;
+inline bool ltc6915_isValidGainWord(uint8_t gainWord){
+  return (gainWord <= LTC6915_GAIN_4096);
 }
 
   /*******************************************************************************
@@ -277,19 +271,71 @@ bool ltc6915_isValidGainWord(uint8_t gainWord){
 * \return
 *  Result of the operation
 *******************************************************************************/
-  bool ltc6915_isValidGainVal(uint8_t gainValue){
-    bool isValidGainVal = false;
-    for(uint8_t i=0; i<8; i++){
-      if(gainValue){
-        bool isBitOn = (gainValue >> i) & 0x01;
-        if(isBitOn){
-          if(gainValue & ~(1 << i)){
-            isValidGainVal = true;
-          }
-          break;
+bool ltc6915_isValidGainVal(uint8_t gainValue){
+  bool isValidGainVal = false;
+  for(uint8_t i=0; i<8; i++){
+    if(gainValue){
+      bool isBitOn = (gainValue >> i) & 0x01;
+      if(isBitOn){
+        if(gainValue & ~(1 << i)){
+          isValidGainVal = true;
         }
+        break;
       }
     }
-    return isValidGainVal;
   }
+  return isValidGainVal;
+}
+
+/*******************************************************************************
+* Function Name: ltc6915_getNextGainWord()
+********************************************************************************
+* \brief
+*  Returns the next gain word. If the gain is max (0x0D -> 4096) then overflows to 
+*   the min gain (0x00 -> 0)
+*   Does not modify the current state.
+* \param state [in]
+* Gain value to check
+*
+* \return
+*  Next gainWord
+*******************************************************************************/
+uint32_t ltc6915_getNextGainWord(LTC6915_S *const state, LTC6915_GAIN_T *const nextWord){
+  uint32_t error = 0;
+  LTC6915_GAIN_T currentGainWord = state->gainWord;
+  if(!ltc6915_isValidGainWord(currentGainWord)){error|=ERROR_VAL;}
+  if(!error){
+    LTC6915_GAIN_T nextGainWord = LTC6915_GAIN_0;
+    if(currentGainWord != LTC6915_GAIN_4096){nextGainWord=currentGainWord+1;}
+    *nextWord = nextGainWord;
+  }
+  return error;
+}
+
+/*******************************************************************************
+* Function Name: ltc6915_getPreviousGainWord()
+********************************************************************************
+* \brief
+*  Returns the previous gain word. If the gain is min (0x00 -> 0) then underflows to
+*  the max gainword (0x0D -> 4096)
+*   Does not modify the current state.
+* \param state [in]
+* Gain value to check
+*
+* \return
+*  Next gainWord
+*******************************************************************************/
+uint32_t ltc6915_getPreviousGainWord(LTC6915_S *const state, LTC6915_GAIN_T *const prevWord){
+  uint32_t error = 0;
+  LTC6915_GAIN_T currentGainWord = state->gainWord;
+  if(!ltc6915_isValidGainWord(currentGainWord)){error|=ERROR_VAL;}
+  if(!error){
+    LTC6915_GAIN_T prevGainWord = LTC6915_GAIN_4096;
+    if(currentGainWord != LTC6915_GAIN_0){prevGainWord=currentGainWord-1;}
+    *prevWord = prevGainWord;
+  }
+  return error;
+}
+
+
 /* [] END OF FILE */

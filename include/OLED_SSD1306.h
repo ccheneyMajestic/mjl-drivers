@@ -173,6 +173,7 @@
   uint32_t SSD1306_renderString(ssd1306_state_s *const state, display_text_s *const text);
   uint32_t SSD1306_setIcon(ssd1306_state_s *const state, display_icon_s *const icon);
   uint32_t SSD1306_clearIcon(ssd1306_state_s *const state, display_icon_s *const icon);
+  uint32_t SSD1306_setIcon_inverse(ssd1306_state_s *const state, display_icon_s *const icon);
 
 
 

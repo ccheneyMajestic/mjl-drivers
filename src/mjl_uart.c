@@ -643,4 +643,42 @@ uint32_t uart_hex2Ascii(uint8_t hex, uint8_t* ascii){
   return error;
 }
 
+/*******************************************************************************
+* Function Name: uart_printError()
+****************************************************************************//**
+* \brief Prints the reason for a specified error
+*
+* \param state [in]
+*  UART structure
+*
+* \param description [in]
+*   String of the error to write out
+*
+* \param code [in]
+*  Error code to decipher
+*
+* \return
+*   The error code of the operation
+ *******************************************************************************/
+uint32_t uart_printError(MLJ_UART_S* state, const char *description, uint32_t code){
+  uint32_t error = 0;
+  uart_print(state, description);
+  if(ERROR_NONE == code){error|=uart_println(state,": No Errors");}
+  else {
+    error |= uart_println(state, ": Errors:");
+    if(code & ERROR_POINTER){error|=uart_println(state," * Pointer");}
+    if(code & ERROR_INIT){error|=uart_println(state," * Uninitialized");}
+    if(code & ERROR_RUNNING){error|=uart_println(state," * Running");}
+    if(code & ERROR_STOPPED){error|=uart_println(state," * Stopped");}
+    if(code & ERROR_VAL){error|=uart_println(state," * Value");}
+    if(code & ERROR_TIMEOUT){error|=uart_println(state," * Timeout");}
+    if(code & ERROR_INVALID){error|=uart_println(state," * Invalid");}
+    if(code & ERROR_MODE){error|=uart_println(state," * Mode");}
+    if(code & ERROR_PARAM){error|=uart_println(state," * Param");}
+    if(code & ERROR_UNAVAILABLE){error|=uart_println(state," * Unavailable");}
+  }
+  return error;
+}
+
+
 /* [] END OF FILE */

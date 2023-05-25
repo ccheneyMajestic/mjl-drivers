@@ -447,6 +447,39 @@ uint32_t SSD1306_setIcon(ssd1306_state_s *const state, display_icon_s *const ico
   return error;
 }
 
+/*******************************************************************************
+* Function Name: SSD1306_setIcon_inverse()
+********************************************************************************
+* \brief
+*   Sets an inverted icon in a given position - only works with a 
+*
+* \param state [in/out]
+*   Pointer to the state structure 
+
+* \param icon [in]
+*  Pointer to the icon strcuture 
+*
+* \return
+*  Error code of the operation
+*******************************************************************************/
+uint32_t SSD1306_setIcon_inverse(ssd1306_state_s *const state, display_icon_s *const icon){
+  uint32_t error = 0;
+  display_window_s window;
+  error |= windowFromPos(&icon->pos, 0, &window);
+  if(!error){error|=SSD1306_setWindow(state, &window);}
+  if(!error){
+    uint16_t len = (icon->pos.size_cols * icon->pos.size_rows) / SSD1306_PAGE_HEIGHT;
+    uint8_t invert[len];
+    for(uint8_t i=0; i<len;i++){
+      invert[i]=(~icon->data[i]);
+    } 
+    error|=SSD1306_writeDataArray(state, invert, len);
+  }
+  
+  return error;
+}
+
+
 
 /*******************************************************************************
 * Function Name: SSD1306_clearIcon()
