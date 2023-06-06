@@ -102,6 +102,7 @@
     const uint8_t * data;
     bool wasIconUpdated;
     bool shouldIconRender;
+    bool isInverted;
   }display_icon_s;
 
   /* Strings */
@@ -110,6 +111,7 @@
     char data[ROW_NUM_CHARS];
     bool wasTextUpdated;
     bool shouldTextRender;
+    bool isInverted;
   }display_text_s;
 
 

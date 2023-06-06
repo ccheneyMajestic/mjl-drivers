@@ -75,7 +75,7 @@ uint32_t SSD1306_init(ssd1306_state_s *const state, ssd1306_cfg_s *const cfg) {
 * Function Name: SSD1306_start()
 ********************************************************************************
 * \brief
-*   Initializes the OLED
+*   Initializes the OLED. 
 *
 * \return
 *  Error code of the operation
@@ -97,8 +97,10 @@ uint32_t SSD1306_start(ssd1306_state_s *const state){
       SSD1306_CMD_ON /* Wakeup from sleep */
     };
     error |= SSD1306_writeCommandArray(state, startCommands, SSD_START_ARRAY_LEN);
-    // error |= SSD1306_setWindow(state, &state->fullWindow);
-    // error |= SSD1306_clearScreen(state);
+    if(!error){
+     error |= SSD1306_setWindow(state, &state->fullWindow);
+     error |= SSD1306_clearScreen(state);
+    }
   }
   return error;
 }
@@ -138,18 +140,18 @@ uint32_t SSD1306_stop(ssd1306_state_s *const state){
 *  Error code of the operation
 *******************************************************************************/
 uint32_t SSD1306_writeCommandArray(ssd1306_state_s *const state, uint8_t * cmdArray, uint8_t len) {
-    uint32_t error = 0;
-    if(!state->_isInitialized){error|=ERROR_INIT;}
-    if(!error) {
-      /* Set the Command line low */
-      state->fn_pin_dataCommand_write(SSD1306_DC_COMMAND);
-      state->fn_delayUs(SSD1306_DELAY_US_DC);
-      /* Write array and wait until complete */
-      error |= state->fn_spi_writeArrayBlocking(state->spi_slaveId, cmdArray, len);
-      /* Switch back to Data mode */
-      state->fn_pin_dataCommand_write(SSD1306_DC_DATA);
-    }        
-    return error;
+  uint32_t error = 0;
+  if(!state->_isInitialized){error|=ERROR_INIT;}
+  if(!error) {
+    /* Set the Command line low */
+    state->fn_pin_dataCommand_write(SSD1306_DC_COMMAND);
+    state->fn_delayUs(SSD1306_DELAY_US_DC);
+    /* Write array and wait until complete */
+    error |= state->fn_spi_writeArrayBlocking(state->spi_slaveId, cmdArray, len);
+    /* Switch back to Data mode */
+    state->fn_pin_dataCommand_write(SSD1306_DC_DATA);
+  }        
+  return error;
 }
 
 /*******************************************************************************
@@ -162,16 +164,16 @@ uint32_t SSD1306_writeCommandArray(ssd1306_state_s *const state, uint8_t * cmdAr
 *  Error code of the operation
 *******************************************************************************/
 uint32_t SSD1306_writeDataArray(ssd1306_state_s *const state, const uint8_t * dataArray, uint16_t len) {
-    uint32_t error = 0;
-    if(!state->_isInitialized){error|=ERROR_INIT;}
-    if(!error) {
-      /* Assert that data is being written */
-      state->fn_pin_dataCommand_write(SSD1306_DC_DATA);
-      state->fn_delayUs(SSD1306_DELAY_US_DC);
-      /* Write array and wait until complete */
-      error |= state->fn_spi_writeArrayBlocking(state->spi_slaveId, dataArray, len);
-    }       
-    return error;
+  uint32_t error = 0;
+  if(!state->_isInitialized){error|=ERROR_INIT;}
+  if(!error) {
+    /* Assert that data is being written */
+    state->fn_pin_dataCommand_write(SSD1306_DC_DATA);
+    state->fn_delayUs(SSD1306_DELAY_US_DC);
+    /* Write array and wait until complete */
+    error |= state->fn_spi_writeArrayBlocking(state->spi_slaveId, dataArray, len);
+  }       
+  return error;
 }
 
 /*******************************************************************************
@@ -410,6 +412,7 @@ uint32_t SSD1306_renderString(ssd1306_state_s *const state, display_text_s *cons
       else if(val>='a' && val<='z'){letters[i] = alphabet_8x16[(val-ASCII_OFFSET_LETTER_LOWER)];}
       else if(val>='0' && val<='9'){letters[i] = digits_8x16[(val-ASCII_OFFSET_DIGIT)];}
       else if(' '== val){letters[i] = specialChars_8x16[UI_CHARS_IDX_SPACE];}
+      else if('-'== val){letters[i] = specialChars_8x16[UI_CHARS_IDX_DASH];}
       else{
         error|=ERROR_VAL;
         break;

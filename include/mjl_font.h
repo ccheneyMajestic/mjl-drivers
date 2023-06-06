@@ -29,6 +29,7 @@
   #define UI_ICON_RESET_LEN                   (48) /* number of bytes in the reset icon */
 
   #define UI_CHARS_IDX_SPACE                  (0) /* Index of the space character in specialChars[]*/
+  #define UI_CHARS_IDX_DASH                   (1) /* Index of the space character in specialChars[]*/
   /***************************************
   * External Vars
   ***************************************/
