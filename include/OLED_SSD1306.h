@@ -121,7 +121,7 @@
     uint32_t (*fn_spi_writeArrayBlocking) (uint8_t slaveId, const uint8_t * cmdArray, uint16_t len);
     void (*fn_pin_reset_write) (uint8_t val);
     void (*fn_pin_dataCommand_write) (uint8_t val);
-    void (*fn_delayUs)(uint32_t microsecond);
+    void (*fn_delayUs)(uint16_t microsecond);
     display_window_s fullWindow;
     uint8_t spi_slaveId;
     /* Object function pointer */
@@ -139,7 +139,7 @@
     uint32_t (*fn_spi_writeArrayBlocking) (uint8_t slaveId, const uint8_t * cmdArray, uint16_t len);
     void (*fn_pin_reset_write) (uint8_t val);
     void (*fn_pin_dataCommand_write) (uint8_t val);
-    void (*fn_delayUs)(uint32_t microsecond);
+    void (*fn_delayUs)(uint16_t microsecond);
     display_window_s fullWindow;
     uint8_t spi_slaveId;
     /* Nested objects */

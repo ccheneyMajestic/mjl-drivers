@@ -32,6 +32,10 @@
   #define IS25_RDMDID_LEN       (6) /* Length of the Read ID command  */
   #define IS25_RDMDID_POS_MFG   (4) /* Position of the manufacturer ID */   
   #define IS25_RDMDID_POS_DEV   (5) /* Position of the device ID */   
+
+  #define IS25_ID_MFG           (0x9D)  /* Manufacturer ID */
+  #define IS25_ID_DEV           (0x14)  /* Device ID */
+
   /***************************************
   * Enumerated types
   ***************************************/
@@ -41,11 +45,20 @@
   ***************************************/
   /* Configuration Structure */
   typedef struct {
+    void (*fn_delayUs)(uint16_t microsecond);
+    uint32_t (*fn_spi_writeArrayBlocking) (uint8_t slaveId, const uint8_t * cmdArray, uint16_t len);
+    uint32_t (*fn_spi_readArrayBlocking) (uint8_t slaveId, uint8_t * buffer, uint16_t len);
+    uint8_t slaveId;
 
   } FLASH_IS25_CFG_S;
 
   /* Serial State Object   */
   typedef struct {
+    void (*fn_delayUs)(uint16_t microsecond);
+    uint32_t (*fn_spi_writeArrayBlocking) (uint8_t slaveId, const uint8_t * cmdArray, uint16_t len);
+    uint32_t (*fn_spi_readArrayBlocking) (uint8_t slaveId, uint8_t * buffer, uint16_t len);
+    uint8_t slaveId;
+
 
     bool _init;
     bool _running;
@@ -59,7 +72,7 @@
   /* State Operations */
   uint32_t flash_is25_init(FLASH_IS25_S *const state, FLASH_IS25_CFG_S *const cfg);
   uint32_t flash_is25_start(FLASH_IS25_S *const state);
-  uint32_t flash_is25_stop(FLASH_IS25_S *const state);
+  // uint32_t flash_is25_stop(FLASH_IS25_S *const state);
 
 #endif /* FLASH_IS25_H */
 /* [] END OF FILE */
