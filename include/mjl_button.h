@@ -20,7 +20,7 @@
   /***************************************
   * Macro Definitions
   ***************************************/
-
+  #define BUTTON_LONG_PRESS     (1000) /* Duration in [ms] for a long press */
   /***************************************
   * Enumerated types
   ***************************************/
@@ -39,6 +39,10 @@
     bool (*fn_isBtnPressed)(void);  /* Function point to if the button is pressed */
     bool isBtnPressed;
     bool isBtnPressed_prev;
+    bool flag_wasButtonPressed;
+    bool flag_wasButtonHeld;        /* Long press */
+    bool flag_wasButtonHeld_handled;
+    bool flag_wasButtonReleased;
     uint64_t startMillis;
     uint32_t elapsedMillis;
     bool _init;
@@ -52,6 +56,8 @@
   /* State Operations */
   uint32_t button_init(MJL_BUTTON_S *const state, MJL_BUTTON_CFG_S *const cfg);
   uint32_t button_updateButton(MJL_BUTTON_S *const state, uint64_t currentMillis);
+  uint32_t button_clearState(MJL_BUTTON_S *const state);
+
 
 #endif /* MJL_BUTTON_H */
 /* [] END OF FILE */

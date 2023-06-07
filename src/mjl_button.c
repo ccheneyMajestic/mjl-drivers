@@ -42,10 +42,7 @@ uint32_t button_init(MJL_BUTTON_S *const state, MJL_BUTTON_CFG_S *const cfg){
     /* Copy params */
     state->fn_isBtnPressed = cfg->fn_isBtnPressed;
     /* Set default vals */
-    state->isBtnPressed = false;
-    state->isBtnPressed_prev = false;
-    state->startMillis = 0;
-    state->elapsedMillis = 0;
+    error |= button_clearState(state);
     /* Mark as initialized */
     state->_init = true;
   }
@@ -78,16 +75,51 @@ uint32_t button_updateButton(MJL_BUTTON_S *const state, uint64_t currentMillis){
     /* Check for state transition */
     if(state->isBtnPressed != state->isBtnPressed_prev){
       if(state->isBtnPressed){
+        state->flag_wasButtonPressed = true;
         state->startMillis = currentMillis;
         state->elapsedMillis = 0;
       }
       else{
+        state->flag_wasButtonReleased = true;
         state->elapsedMillis = currentMillis - state->startMillis;
-        state->startMillis = 0;
+      }
+    }
+    /* Update elasped time when pressed */
+    else if(state->isBtnPressed){
+      state->elapsedMillis = currentMillis - state->startMillis;
+      if(state->elapsedMillis >= BUTTON_LONG_PRESS){
+        state->flag_wasButtonHeld=true;
       }
     }
   }
   return error;
 }
+
+/*******************************************************************************
+* Function Name: button_clearState()
+********************************************************************************
+* \brief
+*   Clear the flags and durations of the button. Call after the button
+*   Interaction has been completed 
+*
+* \param state [in/out]
+* Pointer to the state struct
+*
+* \return
+*  Error code of the operation
+*******************************************************************************/
+inline uint32_t button_clearState(MJL_BUTTON_S *const state){
+  uint32_t error = 0;
+  state->isBtnPressed = false;
+  state->isBtnPressed_prev = false;
+  state->flag_wasButtonPressed = false;
+  state->flag_wasButtonReleased = false;
+  state->flag_wasButtonHeld= false;
+  state->flag_wasButtonHeld_handled= false;
+  state->startMillis = 0;
+  state->elapsedMillis = 0;
+  return error;
+}
+
 
 /* [] END OF FILE */
