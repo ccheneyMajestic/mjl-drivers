@@ -30,6 +30,13 @@
 
   #define UI_CHARS_IDX_SPACE                  (0) /* Index of the space character in specialChars[]*/
   #define UI_CHARS_IDX_DASH                   (1) /* Index of the space character in specialChars[]*/
+
+  #define FONT_BATT_SINGLE_LINE (0x7E)
+  #define FONT_BATT_MIN_WIDTH (7)
+  #define FONT_BATT_SOC_MAX (100)
+  #define FONT_BATT_BORDER_LEFT   (2)
+  #define FONT_BATT_BORDER_RIGHT  (1)
+
   /***************************************
   * External Vars
   ***************************************/
@@ -60,7 +67,7 @@
   /***************************************
   * Function declarations 
   ***************************************/
-
+  uint32_t font_generateBatteryIcon(uint8_t stateOfCharge, uint8_t width, uint8_t* outputBuffer);
 
 
 #endif /* MJL_FONT_H*/

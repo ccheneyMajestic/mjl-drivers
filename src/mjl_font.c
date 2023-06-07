@@ -12,7 +12,7 @@
 * 2023.04.17  - Document Created
 ********************************************************************************/
 #include "mjl_font.h"
-
+#include "mjl_errors.h"
 
 
 /* Icon bitmaps */
@@ -84,5 +84,46 @@ const uint8_t* digits_8x16[10]  = {zero_8x16, one_8x16, two_8x16, three_8x16, fo
 const uint8_t space_8x16[UI_TEXT_8x16_LEN]   = {0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00}; 
 const uint8_t dash_8x16[UI_TEXT_8x16_LEN]   = {0x00, 0x80, 0x80, 0x80, 0x80, 0x80, 0x80, 0x00, 0x00, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x00}; 
 const uint8_t* specialChars_8x16[10] = {space_8x16, dash_8x16};
+
+
+/*******************************************************************************
+* Function Name: font_generateBatteryIcon()
+********************************************************************************
+* \brief
+*   Generates a battery icon given the state of charge of the battery and
+*  width. Returns battery icon of height 8 right now
+*
+* \param stateOfCharge [in]
+*  The charge of the battery represented as [%] - max 100
+* 
+* \param width  [in]
+*   Width of the icon to generate in [pixels]
+* 
+* \param outputBuffer  [out]
+*   Pointer to the buffer to place the icon. Must be at least width*height in length
+* 
+* \return
+*  Error code of the operation
+*******************************************************************************/
+uint32_t font_generateBatteryIcon(uint8_t stateOfCharge, uint8_t width, uint8_t* outputBuffer){
+  uint32_t error = 0;
+  if(FONT_BATT_SOC_MAX < stateOfCharge){error|=ERROR_VAL;}
+  if(FONT_BATT_MIN_WIDTH > width){error|=ERROR_VAL;}
+
+  if(!error){
+    uint8_t numBins = width-(FONT_BATT_BORDER_LEFT+FONT_BATT_BORDER_RIGHT);
+    uint8_t binSize = FONT_BATT_SOC_MAX/numBins;
+    uint8_t numBinsAsserted = stateOfCharge/binSize;
+    for(uint8_t i=width; i>0; i--){
+      uint8_t idx = i-1;
+      uint8_t colData=icon_batteryOutline[idx];
+      uint8_t barIndex = (width-FONT_BATT_BORDER_RIGHT) - idx;
+      if(barIndex <= numBinsAsserted){colData |= FONT_BATT_SINGLE_LINE;}
+      outputBuffer[idx]=colData;
+    }
+  }
+  return error;
+}
+
 
 /* [] END OF FILE */
