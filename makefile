@@ -15,10 +15,13 @@ LIB_SOURCES = $(wildcard $(SOURCE_DIRS)/*.c)
 OBJS = $(LIB_SOURCES:$(SOURCE_DIRS)/%.c=$(OBJ_DIR)/%.o)
 
 # Library
-LIBRARY = ./build/cortex-m0/libmjl_drivers.a
+VERSION_FILE := ./build/cortex-m0/version.txt
+VERSION := $(shell cat $(VERSION_FILE))
+NEW_VERSION := $(shell echo $$(($(VERSION)+1)))
+LIBRARY = ./build/cortex-m0/libmjl_drivers_v$(NEW_VERSION).a
 
 # Targets
-all: $(LIBRARY)
+all: update_version $(LIBRARY)
 
 $(LIBRARY): $(OBJS)
 	$(AR) rcs $@ $^
@@ -32,3 +35,6 @@ $(OBJ_DIR):
 
 clean:
 	rm -rf $(OBJ_DIR)
+
+update_version:
+	@echo $(NEW_VERSION) > $(VERSION_FILE)
