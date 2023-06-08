@@ -1,3 +1,7 @@
+# Majestic Labs Drivers
+# C. Cheney 2023.06.08
+# Build using WSL on Windows
+
 # Compiler and linker settings
 CC = arm-none-eabi-gcc
 AR = arm-none-eabi-ar
