@@ -98,15 +98,15 @@ uint32_t SSD1306_start(ssd1306_state_s *const state){
     };
     error |= SSD1306_writeCommandArray(state, startCommands, SSD_START_ARRAY_LEN);
     if(!error){
-     error |= SSD1306_setWindow(state, &state->fullWindow);
-     error |= SSD1306_clearScreen(state);
+      error |= SSD1306_setWindow(state, &state->fullWindow);
+      error |= SSD1306_clearScreen(state);
     }
   }
   return error;
 }
 
 /*******************************************************************************
-* Function Name: SSD1306_start()
+* Function Name: SSD1306_stop()
 ********************************************************************************
 * \brief
 *   Initializes the OLED
@@ -118,8 +118,13 @@ uint32_t SSD1306_stop(ssd1306_state_s *const state){
   uint32_t error = 0;
   if(!state->_isInitialized){error|=ERROR_INIT;}
   if(!error){
-    uint8_t stopCommand = SSD1306_CMD_SLEEP;
-    error |= SSD1306_writeCommandArray(state, &stopCommand, 1);
+    #define SSD1306_STOP_ARRAY_LEN 3
+    uint8_t stopCommands[SSD1306_STOP_ARRAY_LEN] ={
+      SSD1306_CMD_CHARGE_PUMP, SSD1306_CMD_CHARGE_PUMP_OFF, 
+      SSD1306_CMD_SLEEP
+    };
+    error |= SSD1306_writeCommandArray(state, stopCommands, SSD1306_STOP_ARRAY_LEN);
+
     /* Hardware Reset */
     state->fn_pin_reset_write(SSD1306_RESET_DISASSERT);
     state->fn_pin_dataCommand_write(SSD1306_DC_COMMAND);
