@@ -313,30 +313,21 @@ uint32_t SSD1306_setDigits(ssd1306_state_s *const state, uint8_t* digits, displa
 * \return
 *  Error code of the operation
 *******************************************************************************/
-uint32_t SSD1306_setDigits_16x32(ssd1306_state_s *const state, uint8_t *digits, display_position_s *const pos){
+uint32_t SSD1306_setDigits_16x32(ssd1306_state_s *const state, const uint8_t **digits, display_position_s *const pos){
     uint32_t error = 0;
     /* Only support whole pages right now */
     if(pos->origin_row % SSD1306_PAGE_HEIGHT != 0){
-      error = 1;
-      // printLn(&usb, "Non integer page row location %i", pos->origin_row);
+      error = ERROR_VAL;
     }
     if(!error) {
-      uint8_t i; 
-      bool shouldDigitRender = false;
-      for(i=0; i < pos->repeat_num; i++){
-        /* Don't render leading zeros */
-        if(shouldDigitRender || digits[i] > 0 ){shouldDigitRender = true;}
-        /* Render last 0 */
-        else if(i == pos->repeat_num -1){}
-        else {continue;}
+      for(uint8_t i=0; i< pos->repeat_num; i++){
         /* Calculate the digit */
         uint8_t newLetter[DISPLAY_LEN_16x32];
-        error |= create16x32(digits_8x16[digits[i]], newLetter);
+        error |= create16x32(digits[i], newLetter);
         /* Calculate the window */
         display_window_s window;
         error |= windowFromPos(pos, i, &window);
         error |= SSD1306_setWindow(state, &window); 
-        /* draw the digit */
         error |= SSD1306_writeDataArray(state, newLetter, DISPLAY_LEN_16x32);
         if(error){break;}
       }
@@ -366,8 +357,7 @@ uint32_t SSD1306_setLetters(ssd1306_state_s *const state, const uint8_t **letter
   uint32_t error = 0;
   /* Only support whole pages right now */
   if(pos->origin_row % SSD1306_PAGE_HEIGHT != 0){
-    error = 1;
-    // printLn(&usb, "Non integer page row location %i", pos->origin_row);
+    error = ERROR_VAL;
   }
   if(!error) {
     uint8_t i; 
@@ -412,6 +402,7 @@ uint32_t SSD1306_renderString(ssd1306_state_s *const state, display_text_s *cons
   if(!error){
     const uint8_t* letters[ROW_NUM_CHARS];
     for(uint8_t i=0; i<len; i++){
+      /* Set scaled up letter */
       uint8_t val = text->data[i];
       if(val>='A' && val<='Z'){letters[i] = alphabet_8x16[(val-ASCII_OFFSET_LETTER_CAP)];}
       else if(val>='a' && val<='z'){letters[i] = alphabet_8x16[(val-ASCII_OFFSET_LETTER_LOWER)];}
@@ -423,7 +414,14 @@ uint32_t SSD1306_renderString(ssd1306_state_s *const state, display_text_s *cons
         break;
       }
     }
-    if(!error){error|= SSD1306_setLetters(state, letters ,&text->pos);}
+    if(!error){
+      /* Set large letter */
+      if((16 == text->pos.size_cols) && (32 == text->pos.size_rows)){
+        error |= SSD1306_setDigits_16x32(state, letters, &text->pos);
+      }
+      else{
+        error|= SSD1306_setLetters(state, letters ,&text->pos);}
+      }
   }
   return error;
 }
