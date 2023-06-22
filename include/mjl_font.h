@@ -30,6 +30,7 @@
 
   #define UI_CHARS_IDX_SPACE                  (0) /* Index of the space character in specialChars[]*/
   #define UI_CHARS_IDX_DASH                   (1) /* Index of the space character in specialChars[]*/
+  #define FONT_LEN_DECIMAL              (4) /* Length of the decimal, colon, etc. */
 
   #define FONT_BATT_SINGLE_LINE (0x7E)
   #define FONT_BATT_MIN_WIDTH (7)

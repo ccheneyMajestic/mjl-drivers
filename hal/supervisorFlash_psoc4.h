@@ -29,7 +29,9 @@
     #define SFLASH_BASE_ADDR       (CY_SFLASH_USERBASE) /**< Base location in memory of the SFLASH for 256k devices  */
     #define SFLASH_SIZE_ROW        (CY_SFLASH_SIZEOF_USERROW) /**< The size in bytes of the SFlash row  */
 
-    #define SFLASH_ROW_0  (0)     /* Row 0 */
+    #define SFLASH_ROW_0  (0)     /* Row 0 - Bootloader information */
+    #define SFLASH_ROW_1  (1)     /* Row 1 - Max history */
+  
   
     #define SFLASH_NUM_ROWS        (4u)    /**< Number of rows available for user data  */
     #define SFLASH_INDEX_ROW_NAME  (1u)    /**< Row index that contains the BLE Device Name  */
