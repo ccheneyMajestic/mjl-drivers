@@ -36,6 +36,8 @@ const MJL_TEMPLATE_CFG_S template_cfg_default = {
 uint32_t template_init(MLJ_TEMPLATE_S *const state, MJL_TEMPLATE_CFG_S *const cfg){
   uint32_t error = 0;
   /* Verify required functions */
+  error |= (NULL == state) ? ERROR_POINTER : ERROR_NONE;
+  error |= (NULL == cfg) ? ERROR_POINTER : ERROR_NONE;
   error |= (NULL == cfg->hal_req_function) ? ERROR_POINTER : ERROR_NONE;
   /* external start is not required */
   /* external stop is not required */
@@ -48,7 +50,6 @@ uint32_t template_init(MLJ_TEMPLATE_S *const state, MJL_TEMPLATE_CFG_S *const cf
     /* Mark as initialized */
     state->_init = true;
     state->_running = false;
-    state->isLoggingEnabled = true;
   }
   if(error){state->_init=false;}
   return error;
