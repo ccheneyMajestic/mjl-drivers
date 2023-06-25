@@ -63,6 +63,8 @@
   #define ASCII_OFFSET_LETTER_LOWER           ('a') /* Use to map lowercase ascii to alphabet offset */
   #define ASCII_OFFSET_DIGIT                  ('0') /* Use to map ascii to alphabet offset */
   
+  #define BITS_PER_BYTE (8)
+
 
   /***************************************
   * Enumerated Types
@@ -114,6 +116,57 @@
     bool isInverted;
   }display_text_s;
 
+  /* Lines */
+  typedef struct{
+    uint8_t rowStart;
+    uint8_t colStart;
+    uint8_t numCol;
+    uint8_t numRow;
+  } display_line_cfg_s;
+
+  typedef struct {
+    uint8_t colStart;
+    uint8_t rowStart;
+    uint8_t numCol;
+    uint8_t numRow;
+
+
+    uint8_t rowEnd;
+    uint8_t colEnd;
+    uint8_t pageStart;
+    uint8_t pageEnd;
+    uint8_t numPage;
+    bool _isInit;
+    bool shouldRender;
+  } display_line_s;
+  extern const display_line_cfg_s display_line_cfg_default;
+
+
+  /* Graph */
+  typedef struct{
+    uint8_t rowStart;
+    uint8_t colStart;
+    uint8_t numCol;
+    uint8_t numRow;
+  } display_graph_cfg_s;
+
+  typedef struct {
+    uint8_t rowStart;
+    uint8_t colStart;
+    uint8_t numCol;
+    uint8_t numRow;
+
+    uint8_t rowEnd;
+    uint8_t colEnd;
+    uint8_t pageStart;
+    uint8_t pageEnd;
+    uint8_t numPage;
+    display_line_s axis_horizontal;
+    display_line_s axis_vertical;
+    bool _isInit;
+    bool shouldGraphRender;
+  } display_graph_s;
+  extern const display_graph_cfg_s display_graph_cfg_default;
 
   /* Object Configuration Structure */
   typedef struct{
@@ -177,14 +230,17 @@
   uint32_t SSD1306_clearIcon(ssd1306_state_s *const state, display_icon_s *const icon);
   uint32_t SSD1306_setIcon_inverse(ssd1306_state_s *const state, display_icon_s *const icon);
 
-
-
-
-
-  uint32_t windowFromPos(display_position_s *const pos, uint8_t instanceNum, display_window_s *const window);
   uint32_t create16x32(const uint8_t * inObject, uint8_t * outObject);
   uint32_t tokenizeNumber(uint16_t val, uint8_t *outArray);
 
+  uint32_t SSD1306_drawLine(ssd1306_state_s *const state, display_line_s *const line);
+
+  /* Display objects */
+  uint8_t reverseBits(uint8_t byte);
+  uint32_t windowFromPos(display_position_s *const pos, uint8_t instanceNum, display_window_s *const window);
+  uint32_t display_graph_init(display_graph_s *const state, display_graph_cfg_s *const cfg);
+  uint32_t display_updateGraphColumn(ssd1306_state_s *const state, display_graph_s *const graph, uint8_t colIdx, uint8_t val);
+  uint32_t display_line_init(display_line_s *const state, display_line_cfg_s *const cfg);
 
 
 
