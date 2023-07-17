@@ -5,6 +5,11 @@ Middleware for embedded system
 
 # Usage
 
+## Building the library
+Use WSL to build 
+
+`make all` 
+
 ## Configuration
 ### PSoC Creator 
 1. Add file locations to project
