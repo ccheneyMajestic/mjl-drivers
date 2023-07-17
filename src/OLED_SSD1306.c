@@ -63,6 +63,7 @@ uint32_t SSD1306_init(ssd1306_state_s *const state, ssd1306_cfg_s *const cfg) {
       state->state_next = SSD1306_STATE_OFF;
       state->state_previous = SSD1306_STATE_OFF;
       state->state_requested = SSD1306_STATE_OFF;
+      state->addressMode = SSD1306_ADDRESSING_PAGE;
     }
     else {
       state->_isInitialized = false;
@@ -204,6 +205,32 @@ uint32_t SSD1306_setWindow(ssd1306_state_s *const state, display_window_s *const
   }
   return error;
 }
+
+/*******************************************************************************
+* Function Name: SSD1306_setAddressingMode()
+********************************************************************************
+* \brief
+*   Set the addressing mode
+*
+* \return
+*  Error code of the operation
+*******************************************************************************/
+uint32_t SSD1306_setAddressingMode(ssd1306_state_s *const state, ssd1306_addressing_mode_t mode){
+  uint32_t error = 0;
+  if(!state->_isInitialized){error|=ERROR_INIT;}
+  if(mode > SSD1306_ADDRESSING_PAGE){error|=ERROR_VAL;}
+
+  if(!error) {
+    #define ADDRESS_MODE_LEN (2)
+    uint8_t dataArray[ADDRESS_MODE_LEN] = {
+      SSD1306_CMD_ADDRESS_MODE, mode
+    };
+    error |= SSD1306_writeCommandArray(state, dataArray, ADDRESS_MODE_LEN);
+    if(!error){state->addressMode = mode;}
+  }
+  return error;
+}
+
 
 /*******************************************************************************
 * Function Name: SSD1306_clearScreen()
@@ -863,6 +890,32 @@ uint32_t display_updateGraphColumn(ssd1306_state_s *const state, display_graph_s
   }
   return error;
 }
+
+/*******************************************************************************
+* Function Name: display_updateGraphScroll()
+********************************************************************************
+* \brief
+*   Update all of the graph 
+*
+* \return
+*  None
+*******************************************************************************/
+uint32_t display_updateGraphScroll(ssd1306_state_s *const state, display_graph_s *const graph, mjl_ring_s *const ring){
+  uint32_t error = 0;
+  if(!state->_isInitialized){error|=ERROR_INIT;}
+  if(!ring->_init){error|=ERROR_INIT;}
+  if(!graph->_isInit){error|=ERROR_INIT;}
+  
+  if(!error){
+    for(uint8_t i=0; i<ring->count; i++){
+      uint8_t val = ring->buffer[(ring->tail+i)%ring->size];
+      error |= display_updateGraphColumn(state, graph, i, val);
+      if(error){break;}
+    }
+  }
+  return error;
+}
+
 
 /*******************************************************************************
 * Function Name: reverseBits()

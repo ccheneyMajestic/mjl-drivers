@@ -21,6 +21,7 @@
   #include <stdint.h>
   #include <stdbool.h>
   #include <stddef.h>
+  #include "mjl_ringBuffer.h"
   /***************************************
   * Macro Definitions
   ***************************************/
@@ -75,6 +76,12 @@
     SSD1306_STATE_ON,
   } ssd1306_state_t;
 
+  /* Addressing mode */
+  typedef enum{
+    SSD1306_ADDRESSING_HORIZONTAL = SSD1306_CMD_ADDRESS_MODE_HORIZONTAL,
+    SSD1306_ADDRESSING_VERTICAL = SSD1306_CMD_ADDRESS_MODE_VERTICAL,
+    SSD1306_ADDRESSING_PAGE = SSD1306_CMD_ADDRESS_MODE_PAGE
+  } ssd1306_addressing_mode_t;
   
   /***************************************
   * Structures
@@ -198,6 +205,7 @@
     /* Nested objects */
 
     /* State variables */
+    ssd1306_addressing_mode_t addressMode;
     uint32_t stateCount;
     ssd1306_state_t state_current;
     ssd1306_state_t state_next;
@@ -220,6 +228,7 @@
   uint32_t SSD1306_writeCommandArray(ssd1306_state_s *const state, uint8_t * cmdArray, uint8_t len);
   uint32_t SSD1306_writeDataArray(ssd1306_state_s *const state, const uint8_t * dataArray, uint16_t len);
   uint32_t SSD1306_setWindow(ssd1306_state_s *const state, display_window_s *const window);
+  uint32_t SSD1306_setAddressingMode(ssd1306_state_s *const state, ssd1306_addressing_mode_t mode);
   uint32_t SSD1306_clearScreen(ssd1306_state_s *const state);
   uint32_t SSD1306_drawDigit_8x16(ssd1306_state_s *const state, uint8_t num);
   uint32_t SSD1306_setDigits(ssd1306_state_s *const state, uint8_t* digits, display_position_s *const pos);
@@ -240,6 +249,7 @@
   uint32_t windowFromPos(display_position_s *const pos, uint8_t instanceNum, display_window_s *const window);
   uint32_t display_graph_init(display_graph_s *const state, display_graph_cfg_s *const cfg);
   uint32_t display_updateGraphColumn(ssd1306_state_s *const state, display_graph_s *const graph, uint8_t colIdx, uint8_t val);
+  uint32_t display_updateGraphScroll(ssd1306_state_s *const state, display_graph_s *const graph, mjl_ring_s *const ring);
   uint32_t display_line_init(display_line_s *const state, display_line_cfg_s *const cfg);
 
 
