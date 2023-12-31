@@ -90,6 +90,7 @@
   uint32_t uart_printHeader(MLJ_UART_S* state, const char* name, const char *date, const char* time);
   uint32_t uart_hex2Ascii(uint8_t hex, uint8_t* ascii);
   uint32_t uart_printError(MLJ_UART_S* state, const char *description, uint32_t code);
+  
 
 
   // uint32_t uart_printHeaderDTB(MLJ_UART_S* state, const char* name, const char *date, const char* time);
