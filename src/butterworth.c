@@ -18,6 +18,7 @@ const BUTTERWORTH_CFG_S butterworth_cfg_default = {
   .sampleRate = 0,
 };
 
+
 /*******************************************************************************
 * Function Name: butterworth_init()
 ********************************************************************************
@@ -113,7 +114,7 @@ uint32_t butterworth_applyInput(BUTTERWORTH_S *const state, int16_t sample){
     }
     /* Compute the filtered output */
     int32_t y = 0;
-    for(uint8_t i=0; i<5; i++){
+    for(uint8_t i=0; i<4; i++){
       y+= (state->numerator[i] * state->inputLine[i]);
       y-= (state->denominator[i] * state->outputLine[i]);
     }

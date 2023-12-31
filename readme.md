@@ -8,6 +8,7 @@ Middleware for embedded system
 ## Building the library
 Use WSL to build 
 
+`make clean`
 `make all` 
 
 ## Configuration
