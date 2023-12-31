@@ -281,8 +281,10 @@ uint32_t uart_print(MLJ_UART_S* state, const char *pszFmt) {
   if(!error){
     /* Find the length */
     uint16_t len=0;
+    /* Determine length by finding null */
     while(0 != pszFmt[len]){len++;}
-    state->hal_req_writeArray((uint8_t *) pszFmt, len);
+    /* Write the full array, if elements are present */
+    if(0 != len){state->hal_req_writeArray((uint8_t *) pszFmt, len);}
   }
   return error;
 }

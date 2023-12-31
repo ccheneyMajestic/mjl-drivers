@@ -6,13 +6,15 @@
 
 # Compiler and linker settings
 TARGETS := cortex-m0 cortex-m0plus cortex-m4
+# Platform specific flags
+FLAGS_cortex-m4 := -mfloat-abi=hard -mfpu=fpv4-sp-d16
+# Common flags
 CC = arm-none-eabi-gcc
 AR = arm-none-eabi-ar
 CFLAGS  = -mcpu=$(TARGET) -mthumb -Wall -O2 -ffunction-sections -ffat-lto-objects
 ASFLAGS = -mcpu=$(TARGET) -mthumb -Wa,-alh=./build/$@/
 LDFLAGS = -mcpu=$(TARGET) -mthumb --specs=nosys.specs
-# Platform specific flags
-FLAGS_cortex-m4 := -mfloat-abi=hard -mfpu=fpv4-sp-d16
+
 
 # Directories
 INCLUDE_DIRS = ./include
