@@ -15,8 +15,17 @@
 #include "DRV8244.h"
 #include "mjl_errors.h"
 
+/* Default configuration struct */
+const drv8244_cfg_s drv8244_config_default  = {
+  .fn_pin_sleep_write = NULL,
+  .fn_pin_drvoff_write = NULL,
+  .fn_delay_us = NULL,
+  .fn_criticalSection_exit = NULL,
+  .fn_pin_fault_read = NULL,
+  .fn_criticalSection_enter = NULL,
+};
 
- /*******************************************************************************
+/*******************************************************************************
  * Function Name: drv8244_init()
  ********************************************************************************
  * \brief
@@ -28,7 +37,7 @@
  * \return
  *   Error code of the operation
  *******************************************************************************/
- uint32_t drv8244_init(drv8244_state_s *const state, drv8244_config_s *const cfg){
+ uint32_t drv8244_init(drv8244_state_s *const state, drv8244_cfg_s *const cfg){
   uint32_t error = 0;
   /* Set state params */
   state->_init = false;

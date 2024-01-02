@@ -36,11 +36,7 @@
   /***************************************
   * Enumerated Types
   ***************************************/
-//  typedef enum{
-//    DRV8244_STATE_OFF, 
-//    DRV8244_STATE_AWAKE,
-//    DRV8244_STATE_ENABLED,
-//  } drv8244_status_t;
+
   /***************************************
   * Structures
   ***************************************/
@@ -49,11 +45,11 @@
     /* Function pointers */
     void (*fn_pin_sleep_write) (uint32_t); /* Function to control the SLEEP pin */
     void (*fn_pin_drvoff_write) (uint32_t); /* Function to control the DRVFOFF pin */
-    void (*fn_delay_us) (uint32_t); /* Function to delay in [µs] */
+    void (*fn_delay_us) (uint16_t); /* Function to delay in [µs] */
     void (*fn_criticalSection_exit)(uint32_t);   /* Exit critical timing code block */
     uint32_t (*fn_pin_fault_read) (void); /* Function to read the state of the fault pin */
     uint32_t (*fn_criticalSection_enter) (void); /* Enter critcal timing code block */
-  } drv8244_config_s;
+  } drv8244_cfg_s;
 
 
   
@@ -66,7 +62,7 @@
     /* Hardware Abstaction Layer Functions */
     void (*fn_pin_sleep_write) (uint32_t); /* Function to control the SLEEP pin */
     void (*fn_pin_drvoff_write) (uint32_t); /* Function to control the DRVFOFF pin */
-    void (*fn_delay_us) (uint32_t); /* Function to delay in [µs] */
+    void (*fn_delay_us) (uint16_t); /* Function to delay in [µs] */
     void (*fn_criticalSection_exit)(uint32_t);   /* Exit critical timing code block */
     uint32_t (*fn_pin_fault_read) (void); /* Function to read the state of the fault pin */
     uint32_t (*fn_criticalSection_enter) (void); /* Enter critcal timing code block */
@@ -74,10 +70,11 @@
     uint32_t output;
   } drv8244_state_s;
   
+  extern const drv8244_cfg_s drv8244_config_default;
   /***************************************
   * Function declarations 
   ***************************************/
-  uint32_t drv8244_init(drv8244_state_s *const state, drv8244_config_s *const cfg);
+  uint32_t drv8244_init(drv8244_state_s *const state, drv8244_cfg_s *const cfg);
   uint32_t drv8244_start(drv8244_state_s *const state);
   
   uint32_t drv8244_stop(drv8244_state_s *const state);

@@ -38,9 +38,13 @@
 
 /* ############################# BEGIN PROGRAM ############################## */
 uint32_t initHardware(void);
+void hal_drv_pin_sleep_write(uint32_t val);
+void hal_drv_pin_drvoff_write(uint32_t val);
+uint32_t hal_drv_pin_nfault_read(void);
 
 /* Global Variables */
 MLJ_UART_S usb;
+drv8244_state_s drv;
 
 /* Main Program */
 #ifndef MJL_DEBUG
@@ -127,6 +131,19 @@ int main(void){
     uart_println(&usb,"* Press '0' to toggle START/STOP");
     uart_println(&usb, "");
     
+    /* Start the DRV8244 */
+    drv8244_cfg_s drvCfg = drv8244_config_default;
+    drvCfg.fn_delay_us = Cy_SysLib_DelayUs;
+    drvCfg.fn_criticalSection_enter = Cy_SysLib_EnterCriticalSection;
+    drvCfg.fn_criticalSection_exit = Cy_SysLib_ExitCriticalSection;    
+    drvCfg.fn_pin_sleep_write = hal_drv_pin_sleep_write;
+    drvCfg.fn_pin_drvoff_write = hal_drv_pin_drvoff_write;
+    drvCfg.fn_pin_fault_read = hal_drv_pin_nfault_read;
+    uint32_t error_drv = drv8244_init(&drv, &drvCfg);
+    
+    uart_printError(&usb, "drv8244_init", error_drv);
+    
+
     for(;;) {
     uint8_t readVal = 0;
     uint32_t readError = uart_read(&usb, &readVal);
@@ -142,11 +159,25 @@ int main(void){
       }
       /* Enable the DRV */
       else if (' ' == readVal){
-        
+        if(drv.isEnabled){
+          uart_println(&usb, "Disabling the DRV");
+          drv8244_disable(&drv);
+        }
+        else {
+          uart_println(&usb, "Stopping the DRV");
+          drv8244_enable(&drv);
+        }
       }
       /* START/STOP the DRV */
       else if ('0' == readVal) {
-        
+        if(!drv._running){
+          uart_println(&usb, "Starting the DRV");
+          drv8244_start(&drv);
+        }
+        else {
+          uart_println(&usb, "Stopping the DRV");
+          drv8244_stop(&drv);
+        }
       }
     }
   }
@@ -179,7 +210,48 @@ uint32_t initHardware(void) {
     uartCfg.hal_opt_externalStop = uart_psoc6SCB_stop;
     error |= uart_init(&usb, &uartCfg);
     error |= uart_start(&usb);
+    
+
     return error;
+}
+
+/*******************************************************************************
+* Function Name: hal_drv_pin_sleep_write()
+********************************************************************************
+* \brief
+*   Control the nSLEEP pin
+*
+* \return
+*  Error code of the operation
+*******************************************************************************/
+void hal_drv_pin_sleep_write(uint32_t val) {
+  Cy_GPIO_Write(pin_DRV_nSLEEP_0_PORT, pin_DRV_nSLEEP_0_NUM, val);
+}
+
+/*******************************************************************************
+* Function Name: hal_drv_pin_drvoff_write()
+********************************************************************************
+* \brief
+*   Control the DRVOFF pin
+*
+* \return
+*  Error code of the operation
+*******************************************************************************/
+void hal_drv_pin_drvoff_write(uint32_t val) {
+  Cy_GPIO_Write(pin_DRV_DRVOFF_0_PORT, pin_DRV_DRVOFF_0_NUM, val);
+}
+
+/*******************************************************************************
+* Function Name: hal_drv_pin_nfault_read()
+********************************************************************************
+* \brief
+*   Read the nFault pin
+*
+* \return
+*  Error code of the operation
+*******************************************************************************/
+uint32_t hal_drv_pin_nfault_read(void){
+  return Cy_GPIO_Read(pin_DRV_nFAULT_PORT, pin_DRV_nFAULT_NUM); 
 }
 
 /* [] END OF FILE */
