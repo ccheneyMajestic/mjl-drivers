@@ -17,7 +17,7 @@
   * Included files
   ***************************************/
   #include <stdbool.h>
-  #include <mjl_errors.h>
+  #include <stdint.h>
   /***************************************
   * Macro Definitions
   ***************************************/

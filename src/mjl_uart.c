@@ -11,6 +11,7 @@
 * 2023.04.26  - Document Created
 ********************************************************************************/
 #include "mjl_uart.h"
+#include "mjl_errors.h" 
 #include <stdarg.h>
 #include <stddef.h>
 #include "float.h"

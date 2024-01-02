@@ -164,7 +164,7 @@ int main(void){
           drv8244_disable(&drv);
         }
         else {
-          uart_println(&usb, "Stopping the DRV");
+          uart_println(&usb, "Enabling the DRV");
           drv8244_enable(&drv);
         }
       }
@@ -179,6 +179,15 @@ int main(void){
           drv8244_stop(&drv);
         }
       }
+      
+//      bool in1 = Cy_GPIO_ReadOut(pin_DRV_DEBUG_PWM_PORT, pin_DRV_DEBUG_PWM_0_NUM);
+      bool in1 = false;
+      bool dir = Cy_GPIO_ReadOut(pin_DRV_DIR_PORT, pin_DRV_DIR_0_NUM);
+      bool drvoff = Cy_GPIO_ReadOut(pin_DRV_DRVOFF_PORT, pin_DRV_DRVOFF_0_NUM);
+      bool nSleep = Cy_GPIO_ReadOut(pin_DRV_nSLEEP_PORT, pin_DRV_nSLEEP_0_NUM);
+      bool nFault = Cy_GPIO_Read(pin_DRV_nFAULT_PORT, pin_DRV_nFAULT_0_NUM);
+      uart_printlnf(&usb, "IN1: %b, IN2: %b, AWAKE: %b, ACTIVE: %b, FAULT: %b", \
+          in1, dir, nSleep, !drvoff, !nFault);
     }
   }
       

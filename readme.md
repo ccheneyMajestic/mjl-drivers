@@ -29,6 +29,7 @@ Use WSL to build
     * Add `mjl_drivers` to `Additional libraries`
         * NOTE: do _not_ include `'lib'` or `'.a'`
     * Add the library location to `Additional Library Directories`
+        * It is not required to include `.` if the library is in the source directory
 
 
 ## Hardware Abstraction Layer (HAL)

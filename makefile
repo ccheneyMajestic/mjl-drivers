@@ -41,7 +41,6 @@ $(TARGETS): %: $(BUILD_DIR)/%/$(OBJ_DIR)
 
 # Make the OBJ directory if it doesn't already exist
 $(BUILD_DIR)/%/$(OBJ_DIR):
-	@echo "Creating folder $@"
 	mkdir -p $@
 	
 # Build the library for the given target 
