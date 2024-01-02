@@ -17,6 +17,7 @@
 #include "mjl_errors.h"
 #include "mjl_uart.h"
 #include "hal_psoc6.h"
+#include "DRV8244.h"
 
 /* ####################### BEGIN PROGRAM CONFIGURATION ###################### */
 
@@ -26,8 +27,9 @@
 * Debugging will only occur when MJL_DEBUG is defined
 */
 #ifdef MJL_DEBUG
-//    #define MJL_DEBUG_LED            /* Test the battery charger LED */
-    #define MJL_DEBUG_UART            /* Test the UART Connection */
+//  #define MJL_DEBUG_LED            /* Test the battery charger LED */
+//  #define MJL_DEBUG_UART            /* Test the UART Connection */
+  #define MJL_DEBUG_DRV /* Basic usage the DRV driver chip */
 #endif
 /* -------------- END DEBUG CASE --------------  */
    
@@ -115,6 +117,40 @@ int main(void){
       }
     }
   }
+  #elif defined MJL_DEBUG_DRV 
+    /* Basic usage the DRV driver chip */
+    uart_printHeader(&usb, "MJL_DEBUG_DRV", __DATE__, __TIME__);
+    CyDelay(10);
+    uart_println(&usb, "");
+    uart_println(&usb,"* Press 'Enter' to reset");
+    uart_println(&usb,"* Press 'space' to toggle ENABLE");
+    uart_println(&usb,"* Press '0' to toggle START/STOP");
+    uart_println(&usb, "");
+    
+    for(;;) {
+    uint8_t readVal = 0;
+    uint32_t readError = uart_read(&usb, &readVal);
+    if(!readError) {
+      /* Echo UART */
+      uart_write(&usb, readVal);                
+      /* Reset on Enter */
+      if('\r' == readVal) {
+        uart_print(&usb, "\r\nResetting...");
+        CyDelay(1000);
+        /* Reset both cores */
+        NVIC_SystemReset();
+      }
+      /* Enable the DRV */
+      else if (' ' == readVal){
+        
+      }
+      /* START/STOP the DRV */
+      else if ('0' == readVal) {
+        
+      }
+    }
+  }
+      
   #endif 
   /* Fall through Infinite loop */
   for(;;){}

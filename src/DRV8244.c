@@ -1,287 +1,178 @@
-//  /***************************************************************************
-//  *                             Majestic Labs © 2022
-//  *
-//  * File: DRV8244.c
-//  * Workspace: mjl_drivers
-//  * Version: v1.0.0
-//  * Author: C. Cheney
-//  *
-//  * Brief: Driver functions for the DRV8244 Full bridge driver 
-//  *   
-//  *
-//  * 2022.04.02  - Document Created
-//  ********************************************************************************/
-//  #include "DRV8244.h"
-//  #include "project.h"
-
-//  /*******************************************************************************
-//  * Function Name: drv8244_init()
-//  ****************************************************************************//**
-//  * \brief
-//  *   Sets the configuration for the 
-//  *
-//  * \param state [in/out]
-//  *  
-//  *
-//  * \return
-//  *   Error code of the operation
-//  *******************************************************************************/
-//  uint32_t drv8244_init(drv8244_state_s *const state, drv8244_config_s *const cfg){
-//      (void) cfg; 
-//      uint32_t error = 0;
-//      // TODO: Input validation
-//      // TODO: object validation
-
-//      /* Initilaize state object */
-//      state->_isObjectInitialized = false;
-//      if(false == error){
-//          /* Set state defaults */
-//          state->_isObjectLocked = true;
-//          state->isRunning = false;
+/***************************************************************************
+*                             Majestic Labs © 2022
+*
+* File: DRV8244.c
+* Workspace: mjl_drivers
+* Version: v1.0.0
+* Author: C. Cheney
+*
+* Brief: Driver functions for the DRV8244 Full bridge driver 
+*   
+*
+* 2022.04.02  - Document Created
+* 2024.01.01 - Updated to MJL Library 
+ ********************************************************************************/
+#include "DRV8244.h"
+#include "mjl_errors.h"
 
 
-//          // TODO: Copy input paratmeters
-//          /* Initizize the state */
-//          state->state_previous = DRV8244_STATE_OFF;
-//          state->state_current = DRV8244_STATE_OFF;
-//          state->state_next = DRV8244_STATE_OFF;
-//          state->isEnabled = false;
+ /*******************************************************************************
+ * Function Name: drv8244_init()
+ ********************************************************************************
+ * \brief
+ *   Verifies and copies the configuration structure. Does not start the device 
+ *
+ * \param state [in/out]
+ *  
+ *
+ * \return
+ *   Error code of the operation
+ *******************************************************************************/
+ uint32_t drv8244_init(drv8244_state_s *const state, drv8244_config_s *const cfg){
+  uint32_t error = 0;
+  /* Set state params */
+  state->_init = false;
+  state->_running = false;
+  state->isEnabled = false;
+  /* Verify required functions */
+  error |= (NULL == cfg->fn_pin_sleep_write) ? ERROR_POINTER : ERROR_NONE;
+  error |= (NULL == cfg->fn_pin_drvoff_write) ? ERROR_POINTER : ERROR_NONE;
+  error |= (NULL == cfg->fn_delay_us) ? ERROR_POINTER : ERROR_NONE;
+  error |= (NULL == cfg->fn_criticalSection_exit) ? ERROR_POINTER : ERROR_NONE;
+  error |= (NULL == cfg->fn_pin_fault_read) ? ERROR_POINTER : ERROR_NONE;
+  error |= (NULL == cfg->fn_criticalSection_enter) ? ERROR_POINTER : ERROR_NONE;
+  
+  if(!error) {
+    /* Copy config params */
+    state->fn_pin_sleep_write = cfg->fn_pin_sleep_write;
+    state->fn_pin_drvoff_write = cfg->fn_pin_drvoff_write;
+    state->fn_delay_us = cfg->fn_delay_us;
+    state->fn_criticalSection_exit = cfg->fn_criticalSection_exit;
+    state->fn_pin_fault_read = cfg->fn_pin_fault_read;
+    state->fn_criticalSection_enter = cfg->fn_criticalSection_enter;
+    /* Mark as initialized */
+    state->_init = true;    
+    /* Reset the device */
+    error |= drv8244_stop(state);
+  }
+  return error;
+}
 
-//          // TODO: Initialize flags and status variables
-//          // TODO: Initialize actuator variables
-//          // TODO: Initialize sensor variables
+ /*******************************************************************************
+ * Function Name: drv8244_start()
+ ********************************************************************************
+ * \brief
+ *   
+ *
+ * \param state [in/out]
+ *  
+ *
+ * \return
+ *   Error code of the operation
+ *******************************************************************************/
+ uint32_t drv8244_start(drv8244_state_s *const state){
+  uint32_t error = 0;
+  if(!state->_init){error|=ERROR_INIT;}
+  if(state->_running){error|=ERROR_RUNNING;}
 
-//          /* pre-initize the state object */
-//          state->_isObjectInitialized = true;
-//          state->_isObjectLocked = false;
+  if(!error) {
+    state->_running = true;
+    /* Enter the critical section */
+    uint32_t interruptState = state->fn_criticalSection_enter();
+    /* Sleep the driver */
+    state->fn_pin_sleep_write(DRV8244_VAL_ASLEEP);
+    state->fn_delay_us(DRV8244_PERIOD_SLEEP); /* HW: Mandatory sleep delay period */
+    /* Wake the driver */
+    state->fn_pin_sleep_write(DRV8244_VAL_AWAKE);
+    state->fn_delay_us(DRV8244_PERIOD_WAKE); /* HW: Mandatory boot delay period */
+    /* Clear the wake fault */
+    state->fn_pin_sleep_write(DRV8244_VAL_ASLEEP);
+    state->fn_delay_us(DRV8244_PERIOD_RESET); /* HW: Mandatory reset fault delay period */
+    state->fn_pin_sleep_write(DRV8244_VAL_AWAKE);
+    state->fn_delay_us(DRV8244_PERIOD_WAKE);
+    /* Ensure fault was cleared  */
+    bool nFault = state->fn_pin_fault_read();
+    if(DRV8244_VAL_FAULT == nFault){error|= ERROR_MODE;}
+    /* Exit critical section */
+    state->fn_criticalSection_exit(interruptState);
+    
+    if(error){state->_running = false;}
+    else {state->_running = true;}
+  }
+  return error;  
+}
 
-//          error |= drv8244_stop(state);
 
-//          // TODO: perform nested state initization
+ /*******************************************************************************
+ * Function Name: drv8244_stop()
+ ********************************************************************************
+ * \brief
+ *   Puts the device to sleep
+ *
+ * \param state [in/out]
+ *  
+ *
+ * \return
+ *   Error code of the operation
+ *******************************************************************************/
+ uint32_t drv8244_stop(drv8244_state_s *const state){
+  uint32_t error = 0;
+  if(!state->_init){error|=ERROR_INIT;}
+  
+  if(!error){
+    /* Disable output */
+    error |= drv8244_disable(state);
+    /* Sleep driver */
+    state->fn_pin_sleep_write(DRV8244_VAL_ASLEEP);
+    state->_running = false;
+  }
+  return error;
+}
 
-//          state->status = 0;
-//          state->output = 0;
-//          state->time_locked = 0;
-//          state->time_running = 0;
-//          state->time_lastUpdate = 0;
+ /*******************************************************************************
+ * Function Name: drv8244_enable()
+ ********************************************************************************
+ * \brief
+ *   Enables the device 
+ *
+ * \param state [in/out]
+ *  
+ *
+ * \return
+ *   Error code of the operation
+ *******************************************************************************/
+uint32_t drv8244_enable(drv8244_state_s *const state){
+  uint32_t error = 0;
+  if(!state->_init){error|=ERROR_INIT;}
+  if(!state->_running){error|=ERROR_STOPPED;}
+  
+  if(!error){
+    state->fn_pin_drvoff_write(DRV8244_VAL_ENABLED);
+    state->isEnabled = true;
+  }
+  return error;
+}
 
-
-
-
-//          // TODO: check for errors
-//          if(true == error){
-//              state->_isObjectInitialized = false;
-//              state->output= error;
-//          }
-//      }
-
-//      return error;    
-//  }
-
-
-//  /*******************************************************************************
-//  * Function Name: drv8244_start()
-//  ****************************************************************************//**
-//  * \brief
-//  *   
-//  *
-//  * \param state [in/out]
-//  *  
-//  *
-//  * \return
-//  *   Error code of the operation
-//  *******************************************************************************/
-//  uint32_t drv8244_start(drv8244_state_s *const state){
-//      uint32_t error = 0;
-//      if(false == state->_isObjectInitialized){
-//          error |= DRV84244_ERROR_INIT;
-//      }
-//      if(true == state->_isObjectLocked) {
-//          error |= DRV84244_ERROR_LOCKED;
-//      }
-//      if(false == error) {
-//          /* Disable interrupts */
-//         uint32_t previous_interruptState = Cy_SysLib_EnterCriticalSection();
-//          /* Lock the state object */
-//          state->_isObjectLocked = true;
-
-//          /* Sleep the Driver */
-//          Cy_GPIO_Write(pin_DRV_nSLEEP_PORT, pin_DRV_nSLEEP_0_NUM, DRV8244_VAL_ASLEEP);
-//          /* HW: Mandatory sleep delay period */
-//          CyDelayUs(DRV8244_PERIOD_SLEEP);
-//          /* Wake the Driver */
-//          Cy_GPIO_Write(pin_DRV_nSLEEP_PORT, pin_DRV_nSLEEP_0_NUM, DRV8244_VAL_AWAKE);
-//          CyDelayUs(DRV8244_PERIOD_WAKE);
-//          /* Clear the awake fault */
-//          Cy_GPIO_Write(pin_DRV_nSLEEP_PORT, pin_DRV_nSLEEP_0_NUM, DRV8244_VAL_ASLEEP);
-//          CyDelayUs(DRV8244_PERIOD_RESET); /* HW: Mandatory reset fault delay period */
-//          Cy_GPIO_Write(pin_DRV_nSLEEP_PORT, pin_DRV_nSLEEP_0_NUM, DRV8244_VAL_AWAKE);
-        
-//          /* Read nFault */
-//          CyDelayUs(DRV8244_PERIOD_WAKE);
-//          bool nFault = Cy_GPIO_Read(pin_DRV_nFAULT_PORT, pin_DRV_nFAULT_0_NUM);
-//          if(DRV8244_VAL_FAULT == nFault) {
-//              error |= DRV84244_ERROR_FAULT;
-//          }
-//          /* Indicate success */
-//          if(false == error){
-//              state->isRunning = true;
-//              /* Release lock and stop the device */
-//              state->_isObjectLocked = false;
-//          }
-//          else {
-//              error |= drv8244_stop(state);
-//          }
-//          /* Release lock */
-//          state->_isObjectLocked = false;
-//          /* Re-enable interrupts */
-//         Cy_SysLib_ExitCriticalSection(previous_interruptState);
-//      }
-//      return error;    
-//  }
-
-//  /*******************************************************************************
-//  * Function Name: drv8244_stop()
-//  ****************************************************************************//**
-//  * \brief
-//  *   Puts the device to sleep
-//  *
-//  * \param state [in/out]
-//  *  
-//  *
-//  * \return
-//  *   Error code of the operation
-//  *******************************************************************************/
-//  uint32_t drv8244_stop(drv8244_state_s *const state){
-//      uint32_t error = 0;
-//          /* Error check  */
-//      if(false == state->_isObjectInitialized){
-//          error |= DRV84244_ERROR_INIT;
-//      }
-//      if(true == state->_isObjectLocked) {
-//          error |= DRV84244_ERROR_LOCKED;
-//      }
-//      if(false == error) {
-//          /* Disable interrupts */
-//          uint32_t previous_interruptState = Cy_SysLib_EnterCriticalSection();
-//          /* Lock the state object */
-//          state->_isObjectLocked = true;
-//          /* disable the object */
-//          state->_isObjectLocked = false;
-//          error |= drv8244_disable(state);
-
-//          /* Sleep the Driver */
-//          Cy_GPIO_Write(pin_DRV_nSLEEP_PORT, pin_DRV_nSLEEP_0_NUM, DRV8244_VAL_ASLEEP);
-        
-//          /* Read back */
-//          bool readVal = Cy_GPIO_ReadOut(pin_DRV_nSLEEP_PORT, pin_DRV_nSLEEP_0_NUM);
-//          if(DRV8244_VAL_ASLEEP != readVal) {
-//              error |= DRV84244_ERROR_SYNC;
-//          }
-//          /* Indicate success */
-//          if(false == error){
-//              state->isRunning = false;
-//          }
-//          /* Release lock */
-//          state->_isObjectLocked = false;
-//          /* Re-enable interrupts */
-//          Cy_SysLib_ExitCriticalSection(previous_interruptState);
-//      }
-//      return error;    
-//  }
-
-//  /*******************************************************************************
-//  * Function Name: drv8244_enable()
-//  ****************************************************************************//**
-//  * \brief
-//  *   Puts the device to sleep
-//  *
-//  * \param state [in/out]
-//  *  
-//  *
-//  * \return
-//  *   Error code of the operation
-//  *******************************************************************************/
-//    uint32_t drv8244_enable(drv8244_state_s *const state){
-//      uint32_t error = 0;
-//      /* Error check  */
-//      if(false == state->_isObjectInitialized){
-//          error |= DRV84244_ERROR_INIT;
-//      }
-//      if(true == state->_isObjectLocked) {
-//          error |= DRV84244_ERROR_LOCKED;
-//      }
-//      /* No error, proceed with enabling */
-//      if(false == error) {
-//          /* Disable interrupts */
-//          uint32_t previous_interruptState = Cy_SysLib_EnterCriticalSection();
-//          /* Lock the state object */
-//          state->_isObjectLocked = true;
-
-//          /* Deassert the DRVOFF pin */
-//          uint8_t writeVal = DRV8244_VAL_ENABLED;
-//          Cy_GPIO_Write(pin_DRV_DRVOFF_PORT, pin_DRV_DRVOFF_0_NUM, writeVal);
-//          /* Read back */
-//          bool readVal = Cy_GPIO_ReadOut(pin_DRV_DRVOFF_PORT, pin_DRV_DRVOFF_0_NUM);
-//          if(writeVal != readVal) {
-//              error |= DRV84244_ERROR_SYNC;
-//          }
-//          /* Indicate success */
-//          if(false == error){
-//              state->isEnabled = true;
-//          }
-//          /* Release lock */
-//          state->_isObjectLocked = false;
-//          /* Re-enable interrupts */
-//          Cy_SysLib_ExitCriticalSection(previous_interruptState);
-//      }
-//      return error;    
-//  }
-
-//  /*******************************************************************************
-//  * Function Name: drv8244_disable()
-//  ****************************************************************************//**
-//  * \brief
-//  *   Puts the device to sleep
-//  *
-//  * \param state [in/out]
-//  *  
-//  *
-//  * \return
-//  *   Error code of the operation
-//  *******************************************************************************/
-//    uint32_t drv8244_disable(drv8244_state_s *const state){
-//      uint32_t error = 0;
-//      if(false == state->_isObjectInitialized){
-//          error |= DRV84244_ERROR_INIT;
-//      }
-//      if(true == state->_isObjectLocked) {
-//          error |= DRV84244_ERROR_LOCKED;
-//      }
-//      if(false == error) {
-//          /* Disable interrupts */
-//          uint32_t previous_interruptState = Cy_SysLib_EnterCriticalSection();
-//          /* Lock the state object */
-//          state->_isObjectLocked = true;
-
-//          /* Assert the DRVOFF pin */
-//          uint8_t writeVal = DRV8244_VAL_DISABLED;
-//          Cy_GPIO_Write(pin_DRV_DRVOFF_PORT, pin_DRV_DRVOFF_0_NUM, writeVal);
-//          /* Read back */
-//          bool readVal = Cy_GPIO_ReadOut(pin_DRV_DRVOFF_PORT, pin_DRV_DRVOFF_0_NUM);
-//          if(writeVal != readVal) {
-//              error |= DRV84244_ERROR_SYNC;
-//          }
-//          /* Indicate success */
-//          if(false == error){
-//              state->isEnabled = false;
-//          }
-//          /* Release lock */
-//          state->_isObjectLocked = false;
-//          /* Re-enable interrupts */
-//          Cy_SysLib_ExitCriticalSection(previous_interruptState);
-//      }
-//      return error;    
-//  }
-
-//  /* [] END OF FILE */
+ /*******************************************************************************
+ * Function Name: drv8244_disable()
+ ********************************************************************************
+ * \brief
+ *  Disables the device 
+ *
+ * \param state [in/out]
+ *  
+ *
+ * \return
+ *   Error code of the operation
+ *******************************************************************************/
+uint32_t drv8244_disable(drv8244_state_s *const state){
+  uint32_t error = 0;
+  if(!state->_init){error|=ERROR_INIT;}
+  
+  if(!error){
+    state->fn_pin_drvoff_write(DRV8244_VAL_DISABLED);
+    state->isEnabled = false;
+  }
+  return error;
+}
+ /* [] END OF FILE */

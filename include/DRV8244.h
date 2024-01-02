@@ -32,59 +32,46 @@
   #define DRV8244_PERIOD_SLEEP          (80) /* Time in [µs] to sleep the device */
   #define DRV8244_PERIOD_WAKE          (1000) /* Time in [µs] to sleep the device */
 
-  
-  
-  #define DRV84244_ERROR_FAULT          (1u << 0) /* A fault is present on the nFault pin */
-  #define DRV84244_ERROR_INIT           (1u << 1) /* Failed to initialize the device */
-  #define DRV84244_ERROR_SYNC           (1u << 2) /* Hardware is not synchronized */
-  #define DRV84244_ERROR_LOCKED         (1u << 3) /* Hardware is not synchronized */
-
-
-
 
   /***************************************
   * Enumerated Types
   ***************************************/
-  typedef enum{
-    DRV8244_STATE_OFF, 
-    DRV8244_STATE_AWAKE,
-    DRV8244_STATE_ENABLED,
-
-  } drv8244_state_t;
+//  typedef enum{
+//    DRV8244_STATE_OFF, 
+//    DRV8244_STATE_AWAKE,
+//    DRV8244_STATE_ENABLED,
+//  } drv8244_status_t;
   /***************************************
   * Structures
   ***************************************/
   /* Configuration Structure */
   typedef struct {
     /* Function pointers */
-
-
+    void (*fn_pin_sleep_write) (uint32_t); /* Function to control the SLEEP pin */
+    void (*fn_pin_drvoff_write) (uint32_t); /* Function to control the DRVFOFF pin */
+    void (*fn_delay_us) (uint32_t); /* Function to delay in [µs] */
+    void (*fn_criticalSection_exit)(uint32_t);   /* Exit critical timing code block */
+    uint32_t (*fn_pin_fault_read) (void); /* Function to read the state of the fault pin */
+    uint32_t (*fn_criticalSection_enter) (void); /* Enter critcal timing code block */
   } drv8244_config_s;
 
 
   
   /* State Structure */
   typedef struct {
-    bool _isObjectInitialized;
-    bool _isObjectLocked;
-    bool isRunning;
-
+    bool _init;
+    bool _running;
     /* State Variables */
-    drv8244_state_t state_previous;
-    drv8244_state_t state_current;
-    drv8244_state_t state_next;
     bool isEnabled;
-
-
+    /* Hardware Abstaction Layer Functions */
+    void (*fn_pin_sleep_write) (uint32_t); /* Function to control the SLEEP pin */
+    void (*fn_pin_drvoff_write) (uint32_t); /* Function to control the DRVFOFF pin */
+    void (*fn_delay_us) (uint32_t); /* Function to delay in [µs] */
+    void (*fn_criticalSection_exit)(uint32_t);   /* Exit critical timing code block */
+    uint32_t (*fn_pin_fault_read) (void); /* Function to read the state of the fault pin */
+    uint32_t (*fn_criticalSection_enter) (void); /* Enter critcal timing code block */
     /* Outputs */
-    uint32_t status;
     uint32_t output;
-    /* State variables */
-    uint32_t time_locked; 
-    uint32_t time_running; 
-    uint32_t time_lastUpdate; 
-
-
   } drv8244_state_s;
   
   /***************************************
@@ -92,9 +79,11 @@
   ***************************************/
   uint32_t drv8244_init(drv8244_state_s *const state, drv8244_config_s *const cfg);
   uint32_t drv8244_start(drv8244_state_s *const state);
+  
   uint32_t drv8244_stop(drv8244_state_s *const state);
   uint32_t drv8244_enable(drv8244_state_s *const state);
   uint32_t drv8244_disable(drv8244_state_s *const state);
+  
 
 
 #endif /* DRV8244_H*/
