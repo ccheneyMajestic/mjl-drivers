@@ -5,11 +5,20 @@ Middleware for embedded system
 
 # Usage
 
-## Building the library
-Use WSL to build 
+## Prerequisites
+### Windows
+1. Install Windows Subsystem for Linux (WSL)
 
-`make clean`
-`make all` 
+1. Install `arm-none-eabi-gcc`
+    1. Download the latest Tarball from https://developer.arm.com/downloads/-/gnu-rm
+    1. Unzip `sudo tar xjf gcc-arm-none-eabi-10.3-2021.10-x86_64-linux.tar.bz2  -C /mnt/wsl`
+    1. Symlink the binaries `sudo ln -s /mnt/wsl/gcc-arm-none-eabi-10.3-2021.10/bin/* /usr/bin/`
+    1. Ensure `arm-none-eabi-gcc --version` execute
+
+## Building the library
+1. Use WSL to build on Windows
+1. `make clean`
+1. `make all` 
 
 ## Configuration
 ### PSoC Creator 
