@@ -73,3 +73,69 @@
     
 #endif /* MJL_SPI_H */
 /* [] END OF FILE */
+
+
+// /***************************************************************************
+// *                              Impact Biosystems © 2021
+// *                               
+// *
+// * File: PSoC6_SPI.h
+// * Workspace: 05_Gen2
+// * Project: scannerDriver_v4.0
+// * Version: 1.0.0
+// * Authors: E. Burba
+// * 
+// * PCB: Scanner Driver v4.0.0
+// * mcuType: PSoC 6 BLE Module
+// *
+// * Brief:
+// *   Header for PSoC6_SPI.c
+// *
+// * 2021.08.03 - EB Document Created
+// ********************************************************************************/
+
+// /* Header Guard */
+// #ifndef SPI_PSOC6_H
+//     #define SPI_PSOC6_H
+//     /***************************************
+//     * Included files
+//     ***************************************/
+//     #include <stdint.h>
+//     #include "micaCommon.h"
+//     #include "micaComms.h"
+//     /***************************************
+//     * Macro Definitions
+//     ***************************************/
+    
+//     //    #define SPI_PSOC_ERROR_NONE         (0) /**< No error occurred (or no error detection present) */
+// //    
+// //    #define SPI_PSOC_FLAG_NO_DATA       (0) /**< No Data was received */
+// //    #define SPI_PSOC_FLAG_PENDING_RX    (1) /**< Data was already in the queue */
+// //    
+// //    #define SPI_PSOC_ERROR_NO_DATA      (1u << SPI_PSOC_FLAG_NO_DATA) /**< No Data was received */
+// //    #define SPI_PSOC_ERROR_PENDING_RX   (1u << SPI_PSOC_FLAG_PENDING_RX) /**< Data was already in the queue */
+    
+    
+//     /***************************************
+//     * Enumerated Types
+//     ***************************************/
+
+    
+//     /***************************************
+//     * Structures
+//     ***************************************/
+
+//     /***************************************
+//     * Function declarations 
+//     ***************************************/ 
+//     uint32_t spiPsoc6_start(COMMS_SPI_S *spi);
+//     uint32_t spiPsoc6_setActive(uint8_t id);
+//     uint32_t spiPsoc6_write(uint8_t addr, uint8_t val);
+//     uint32_t spiPsoc6_read(uint8_t addr, uint8_t *ret);
+//     uint32_t spiPsoc6_writeArray(uint8_t addr, uint8_t* array, uint16_t len);
+//     uint32_t spiPsoc6_readArray(uint8_t addr, uint8_t* array, uint16_t len);
+//     uint32_t spiPsoc6_getRxBufferSize(uint8_t *result);
+//     uint32_t spiPsoc6_getTxBufferSize(uint8_t *result);
+//     uint32_t spiPsoc6_clearRxBuffer(void);
+//     uint32_t spiPsoc6_clearTxBuffer(void);
+// #endif
