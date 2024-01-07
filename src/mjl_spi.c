@@ -8,16 +8,72 @@
 * Brief: Serial Peripheral Interface middleware driver 
 *   
 *
-* 2023.04.26  - Document Created
+* 2024.01.07 - Document Created
 ********************************************************************************/
 #include "mjl_spi.h"
+#include "mjl_errors.h"
+
 
 const MJL_SPI_CFG_S spi_cfg_default = {
-  .req_hal_writeArray=NULL,
-  .req_hal_read=NULL,
-  .opt_hal_externalStart=NULL,
-  .opt_hal_externalStop=NULL,
+  .req_hal_writeArray = NULL,
+  .req_hal_read = NULL,
+  .req_hal_setActive = NULL,
+  .req_hal_getRxBufferNum = NULL,
+  .req_hal_getTxBufferNum = NULL,
+  .req_hal_clearRxBuffer = NULL,
+  .req_hal_clearTxBuffer = NULL,
+  .opt_hal_externalStart = NULL,
+  .opt_hal_externalStop = NULL,
 };
+
+/*******************************************************************************
+* Function Name: uart_init()
+********************************************************************************
+* \brief
+*   Initializes the uart state struct from a configuration struct 
+*
+* \param state [in/out]
+* Pointer to the state struct
+* 
+* \param cfg [in]
+* Pointer to the configuration struct
+*
+* \return
+*  Error code of the operation
+*******************************************************************************/
+uint32_t spi_init(MJL_SPI_S *const state, MJL_SPI_CFG_S *const cfg){
+  uint32_t error = 0;
+  /* Verify required functions */
+  error |= (NULL == cfg->req_hal_writeArray) ? ERROR_POINTER : ERROR_NONE;
+  error |= (NULL == cfg->req_hal_read) ? ERROR_POINTER : ERROR_NONE;
+  error |= (NULL == cfg->req_hal_setActive) ? ERROR_POINTER : ERROR_NONE;
+  error |= (NULL == cfg->req_hal_getRxBufferNum) ? ERROR_POINTER : ERROR_NONE;
+  error |= (NULL == cfg->req_hal_getTxBufferNum) ? ERROR_POINTER : ERROR_NONE;
+  error |= (NULL == cfg->req_hal_clearRxBuffer) ? ERROR_POINTER : ERROR_NONE;
+  error |= (NULL == cfg->req_hal_clearTxBuffer) ? ERROR_POINTER : ERROR_NONE;
+  error |= (NULL == cfg->opt_hal_externalStart) ? ERROR_POINTER : ERROR_NONE;
+  error |= (NULL == cfg->opt_hal_externalStop) ? ERROR_POINTER : ERROR_NONE;
+  /* Valid Inputs */
+  if(!error) {
+    /* Copy params */
+    state->req_hal_writeArray = cfg->req_hal_writeArray; 
+    state->req_hal_read = cfg->req_hal_read; 
+    state->req_hal_setActive = cfg->req_hal_setActive; 
+    state->req_hal_getRxBufferNum = cfg->req_hal_getRxBufferNum; 
+    state->req_hal_getTxBufferNum = cfg->req_hal_getTxBufferNum; 
+    state->req_hal_clearRxBuffer = cfg->req_hal_clearRxBuffer; 
+    state->req_hal_clearTxBuffer = cfg->req_hal_clearTxBuffer; 
+    state->opt_hal_externalStart = cfg->opt_hal_externalStart; 
+    state->opt_hal_externalStop = cfg->opt_hal_externalStop; 
+    /* Mark as initialized */
+    state->_init = true;
+    state->_running = false;
+    state->isLoggingEnabled = true;
+  }
+  if(error){state->_init=false;}
+  return error;
+}
+
 
 
 /* [] END OF FILE */

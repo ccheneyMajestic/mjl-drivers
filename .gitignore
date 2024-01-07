@@ -10,6 +10,7 @@
 *.icf
 *.ld
 *.scat
+*.mk
 
 .vscode/
 codegentemp/
@@ -18,3 +19,4 @@ CortexM0/
 CortexM0p/
 CortexM4/
 build/
+Export/
