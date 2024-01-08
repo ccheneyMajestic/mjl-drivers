@@ -6,7 +6,8 @@
 
 # Compiler and linker settings
 TARGETS := cortex-m0 cortex-m0plus cortex-m4
-# Platform specific flags
+# TARGETS := cortex-m0
+# # Platform specific flags
 FLAGS_cortex-m4 := -mfloat-abi=hard -mfpu=fpv4-sp-d16
 # Common flags
 CC = arm-none-eabi-gcc
@@ -24,54 +25,51 @@ OBJ_DIR = obj
 INC_DIR = include
 LIB_NAME = libmjl_drivers
 
-# Sources and objects
+# Sources and objects - These are evaluated for individual targets 
 LIB_SOURCES = $(wildcard $(SOURCE_DIRS)/*.c)
-VERSION_FILE := ./version.txt
-VERSION := $(shell cat $(VERSION_FILE))
-NEW_VERSION := $(shell echo $$(($(VERSION)+1)))
-
-# Library
-FULL_NAME = $(LIB_NAME)_v$(NEW_VERSION)_$(TARGET)
+OBJS = $(LIB_SOURCES:$(SOURCE_DIRS)/%.c=$(BUILD_DIR)/$(TARGET)/$(OBJ_DIR)/%.o)
+FULL_NAME = $(LIB_NAME)_v$(VERSION)_$(TARGET)
 LIBRARY = $(BUILD_DIR)/$(TARGET)/$(FULL_NAME).a
+
+# Treat the following targets as always stale
+.PHONY: all 
 
 # Build library for all targets
 all: update_version $(TARGETS)
 
-# For each target, create the object directory
-$(TARGETS): %: $(BUILD_DIR)/%/$(OBJ_DIR) 
-	@echo "Building target $@"
-	$(MAKE) TARGET=$@ build_library
+# Run the update_version script — Increment the build number
+update_version:
+	$(eval LIB_VERSION := $(shell ./update_version.sh))
+	@echo "Building MJL Driver Library v$(LIB_VERSION)"
 
-# Make the OBJ directory if it doesn't already exist
-$(BUILD_DIR)/%/$(OBJ_DIR):
-	mkdir -p $@
-	
-# Build the library for the given target 
-build_library: $(LIBRARY)
+# Build for each target
+$(TARGETS):
+	@echo "Building $(LIB_VERSION) for $@"
+	$(MAKE) TARGET=$@ VERSION=$(LIB_VERSION) build_target_library
 
-# All of the ojbects for which a .o file should be made 
-OBJS = $(LIB_SOURCES:$(SOURCE_DIRS)/%.c=$(BUILD_DIR)/$(TARGET)/$(OBJ_DIR)/%.o)
+# #######################  For each target ##################################
 
-# Package the objects into a library 
+# Called for each target with TARGET passed in
+build_target_library: setup_lib $(LIBRARY)
+
+# Dynamically evaluate the variables for the library
+setup_lib:
+	@echo " ---------------------------- Building for $(TARGET) ---------------------------- "
+	mkdir -p $(BUILD_DIR)/$(TARGET)/$(OBJ_DIR)
+
+# Package all .o files into a .a file for a specified target 
 $(LIBRARY): $(OBJS)
 	$(AR) rcs $@ $^ 
-	zip $(BUILD_DIR)/$(TARGET)/$(FULL_NAME).zip -j $@
-	zip -r $(BUILD_DIR)/$(TARGET)/$(FULL_NAME).zip $(INCLUDE_DIRS) > /dev/null
+	$(eval ZIP :=  $(BUILD_DIR)/$(TARGET)/$(FULL_NAME).zip)
+	zip $(ZIP) -j $@ > /dev/null
+	zip -r $(ZIP) $(INCLUDE_DIRS) > /dev/null
 	rm $@
-	@echo "Created Libary $@"
+	@echo " * Created Libary $(ZIP)"
 
-# Create an object for each .o for each target 
+# Compile each .c into a .o
 $(BUILD_DIR)/$(TARGET)/$(OBJ_DIR)/%.o: $(SOURCE_DIRS)/%.c
 	$(CC) $(CFLAGS) $(FLAGS_$(TARGET)) -c -I$(INCLUDE_DIRS) -o $@ $<
 
 # Delete the full build directory
 clean:
 	rm -rf $(BUILD_DIR)
-
-# Read the file version and increment to a new value
-update_version:
-	@echo "Building MJL Driver library v$(NEW_VERSION)..."
-	@echo $(NEW_VERSION) > $(VERSION_FILE)
-
-# Treat all as always stale
-.PHONY: all
