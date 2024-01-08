@@ -18,6 +18,8 @@
 #include "mjl_uart.h"
 #include "mjl_spi.h"
 #include "hal_psoc6.h"
+#include "max31856.h"
+#include "global.h"
 
 /* ####################### BEGIN PROGRAM CONFIGURATION ###################### */
 
@@ -38,7 +40,6 @@
 uint32_t initHardware(void);
 
 /* Global Variables */
-MLJ_UART_S usb;
 MJL_SPI_S spi;
 
 /* Main Program */
@@ -126,7 +127,30 @@ int main(void){
     uart_println(&usb,"* Press 'Enter' to reset");
     uart_println(&usb, "");
     
+    __enable_irq(); /* Enable global interrupts. */
+      
+  
+    #define TEMP_SENSE_ID  (0)
+    max31856_state_s tempSense;
+    max31856_cfg_s tempSenseCfg = max31856_config_default;
+    tempSenseCfg.slaveId = TEMP_SENSE_ID;
+    tempSenseCfg.spi = &spi;
+    
+    uint32_t error = 0;
+    error |= max31856_init(&tempSense, &tempSenseCfg);
+    error |= max31856_start(&tempSense);
+    uart_printError(&usb, "Start Temp sense", error);
+    if(error){
+      uint8_t CR1_val = (MAX31856_CR1_MASK_TC_K | MAX31856_CR1_MASK_AVG4);
+      uart_printlnf(&usb, "Read 0x%x, expected 0x%x",tempSense.error,CR1_val); 
+    }
+    
+    
     for(;;) {
+      max31856_readTemp(&tempSense);
+      uart_printlnf(&usb, "Temp: %.2f", tempSense.temp);
+      CyDelay(1000);
+      
       uint8_t readVal = 0;
       uint32_t readError = uart_read(&usb, &readVal);
       if(!readError) {
@@ -160,31 +184,33 @@ int main(void){
 *  Error code of the operation
 *******************************************************************************/
 uint32_t initHardware(void) {
-    uint32_t error = 0;
-    /* Start the UART */
-    MJL_UART_CFG_S uartCfg = uart_cfg_default;
-    uartCfg.hal_req_writeArray = uart_psoc6SCB_writeArrayBlocking;
-    uartCfg.hal_req_read = uart_psoc6SCB_read;
-    uartCfg.hal_opt_externalStart = uart_psoc6SCB_start;
-    uartCfg.hal_opt_externalStop = uart_psoc6SCB_stop;
-    error |= uart_init(&usb, &uartCfg);
-    error |= uart_start(&usb);
-    /* Start the SPI Component */
-    MJL_SPI_CFG_S spiCfg = spi_cfg_default;
-    spiCfg.opt_hal_externalStart = spi_psoc6SCB_start;
-    spiCfg.opt_hal_externalStop = spi_psoc6SCB_stop;
-    spiCfg.req_hal_writeArray = spi_psoc6SCB_writeArray_blocking;
-    spiCfg.req_hal_readArray = spi_psoc6SCB_readArray_blocking;
-    spiCfg.req_hal_setActive = spi_psoc6SCB_setActive;
-    spiCfg.req_hal_getRxBufferNum = spi_psoc6SCB_getRxBufferNum;
-    spiCfg.req_hal_getTxBufferNum = spi_psoc6SCB_getTxBufferNum;
-    spiCfg.req_hal_clearRxBuffer = spi_psoc6SCB_clearRxBuffer;
-    spiCfg.req_hal_clearTxBuffer = spi_psoc6SCB_clearTxBuffer;
-    error |= spi_init(&spi, &spiCfg);
-    error |= spi_start(&spi);
-    
-    
-    return error;
+  uint32_t error = 0;
+  /* Start the UART */
+  MJL_UART_CFG_S uartCfg = uart_cfg_default;
+  uartCfg.hal_req_writeArray = uart_psoc6SCB_writeArrayBlocking;
+  uartCfg.hal_req_read = uart_psoc6SCB_read;
+  uartCfg.hal_opt_externalStart = uart_psoc6SCB_start;
+  uartCfg.hal_opt_externalStop = uart_psoc6SCB_stop;
+  error |= uart_init(&usb, &uartCfg);
+  error |= uart_start(&usb);
+  
+  /* Start the SPI Component */
+  MJL_SPI_CFG_S spiCfg = spi_cfg_default;
+  spiCfg.opt_hal_externalStart = spi_psoc6SCB_start;
+  spiCfg.opt_hal_externalStop = spi_psoc6SCB_stop;
+  spiCfg.req_hal_writeArray_blocking = spi_psoc6SCB_writeArray_blocking;
+  spiCfg.req_hal_read = spi_psoc6SCB_read;
+  spiCfg.req_hal_setActive = spi_psoc6SCB_setActive;
+  spiCfg.req_hal_getRxBufferNum = spi_psoc6SCB_getRxBufferNum;
+  spiCfg.req_hal_getTxBufferNum = spi_psoc6SCB_getTxBufferNum;
+  spiCfg.req_hal_clearRxBuffer = spi_psoc6SCB_clearRxBuffer;
+  spiCfg.req_hal_clearTxBuffer = spi_psoc6SCB_clearTxBuffer;
+  error |= spi_init(&spi, &spiCfg);
+  error |= spi_start(&spi);
+
+  
+  
+  return error;
 }
 
 /* [] END OF FILE */

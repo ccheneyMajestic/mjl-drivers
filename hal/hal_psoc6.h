@@ -43,10 +43,10 @@
   uint32_t spi_psoc6SCB_start(MJL_SPI_T *const state);
   uint32_t spi_psoc6SCB_stop(MJL_SPI_T *const state);
   uint32_t spi_psoc6SCB_writeArray_blocking(const uint8_t *array, uint16_t len);
-  uint32_t spi_psoc6SCB_readArray_blocking(uint8_t *results, uint16_t len);
+  uint32_t spi_psoc6SCB_read(uint8_t *result);
   uint32_t spi_psoc6SCB_setActive(uint8_t id);
-  uint32_t spi_psoc6SCB_getRxBufferNum(uint8_t *result);
-  uint32_t spi_psoc6SCB_getTxBufferNum(uint8_t *result);
+  uint32_t spi_psoc6SCB_getRxBufferNum(void);
+  uint32_t spi_psoc6SCB_getTxBufferNum(void);
   uint32_t spi_psoc6SCB_clearRxBuffer(void);
   uint32_t spi_psoc6SCB_clearTxBuffer(void);
     

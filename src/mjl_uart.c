@@ -668,7 +668,7 @@ uint32_t uart_printError(MLJ_UART_S* state, const char *description, uint32_t co
   uart_print(state, description);
   if(ERROR_NONE == code){error|=uart_println(state,": No Errors");}
   else {
-    error |= uart_println(state, ": Errors:");
+    uart_printlnf(state, ": Error 0x%x:", code);
     if(code & ERROR_POINTER){error|=uart_println(state," * Pointer");}
     if(code & ERROR_INIT){error|=uart_println(state," * Uninitialized");}
     if(code & ERROR_RUNNING){error|=uart_println(state," * Running");}
@@ -679,6 +679,7 @@ uint32_t uart_printError(MLJ_UART_S* state, const char *description, uint32_t co
     if(code & ERROR_MODE){error|=uart_println(state," * Mode");}
     if(code & ERROR_PARAM){error|=uart_println(state," * Param");}
     if(code & ERROR_UNAVAILABLE){error|=uart_println(state," * Unavailable");}
+    if(code & ERROR_STATE){error|=uart_println(state," * State");}
   }
   return error;
 }

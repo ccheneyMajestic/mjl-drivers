@@ -33,11 +33,11 @@
   typedef struct MJL_SPI_S MJL_SPI_T;
   /* Configuration Structure */
   typedef struct {
-    uint32_t (*req_hal_writeArray)(const uint8_t *array, uint16_t len);  /* Write data into the TX buffer */
-    uint32_t (*req_hal_readArray)(uint8_t *results, uint16_t len);       /* Move data from the RX buffer to the result */
+    uint32_t (*req_hal_writeArray_blocking)(const uint8_t *array, uint16_t len);  /* Write data into the TX buffer */
+    uint32_t (*req_hal_read)(uint8_t *result);                            /* Move data from the RX buffer to the result */
     uint32_t (*req_hal_setActive) (uint8_t id);                          /* Set the Slave with given ID active */
-    uint32_t (*req_hal_getRxBufferNum) (uint8_t *result);                /* Get the number of elements in the Receive Buffer */
-    uint32_t (*req_hal_getTxBufferNum) (uint8_t *result);                /* Get the number of elements in the Transmit Buffer */
+    uint32_t (*req_hal_getRxBufferNum) (void);                /* Get the number of elements in the Receive Buffer */
+    uint32_t (*req_hal_getTxBufferNum) (void);                /* Get the number of elements in the Transmit Buffer */
     uint32_t (*req_hal_clearRxBuffer) (void);                            /* Clear the Receive Buffer */
     uint32_t (*req_hal_clearTxBuffer) (void);                            /* Clear the Transmit Buffer */
     uint32_t (*opt_hal_externalStart)(MJL_SPI_T *const);                 /* Optional External start function */
@@ -46,11 +46,11 @@
 
   /* Serial State Object   */
   typedef struct {
-    uint32_t (*req_hal_writeArray)(const uint8_t *array, uint16_t len);  /* Write data into the TX buffer */
-    uint32_t (*req_hal_readArray)(uint8_t *results, uint16_t len);                           /* Move data from the RX buffer to the result */
+    uint32_t (*req_hal_writeArray_blocking)(const uint8_t *array, uint16_t len);  /* Write data into the TX buffer */
+    uint32_t (*req_hal_read)(uint8_t *result);                           /* Move data from the RX buffer to the result */
     uint32_t (*req_hal_setActive) (uint8_t id);                          /* Set the Slave with given ID active */
-    uint32_t (*req_hal_getRxBufferNum) (uint8_t *result);                /* Get the number of elements in the Receive Buffer */
-    uint32_t (*req_hal_getTxBufferNum) (uint8_t *result);                /* Get the number of elements in the Transmit Buffer */
+    uint32_t (*req_hal_getRxBufferNum) (void);                /* Get the number of elements in the Receive Buffer */
+    uint32_t (*req_hal_getTxBufferNum) (void);                /* Get the number of elements in the Transmit Buffer */
     uint32_t (*req_hal_clearRxBuffer) (void);                            /* Clear the Receive Buffer */
     uint32_t (*req_hal_clearTxBuffer) (void);                            /* Clear the Transmit Buffer */
     uint32_t (*opt_hal_externalStart)(MJL_SPI_T *const);                 /* Optional External start function */
@@ -69,11 +69,10 @@
   uint32_t spi_init(MJL_SPI_S *const state, MJL_SPI_CFG_S *const cfg);
   uint32_t spi_start(MJL_SPI_S *const state);
   uint32_t spi_stop(MJL_SPI_S *const state);
-  uint32_t spi_writeArray(MJL_SPI_S *const state, uint8_t id, uint8_t * array, uint16_t len);
+  uint32_t spi_writeArray_blocking(MJL_SPI_S *const state, uint8_t id, uint8_t * array, uint16_t len);
   uint32_t spi_readArray(MJL_SPI_S *const state,  uint8_t id, uint8_t * array, uint16_t len);
-
-  // uint32_t spi_write(MJL_SPI_S *const state, uint8_t id, uint8_t data);
-  // uint32_t spi_read(MJL_SPI_S *const state,  uint8_t id, uint8_t * data);
+  uint32_t spi_write(MJL_SPI_S *const state, uint8_t id, uint8_t data);
+  uint32_t spi_read(MJL_SPI_S *const state,  uint8_t id, uint8_t * data);
 
   // uint32_t spi_getRxBufferNum(MJL_SPI_S *const state, uint8_t * result);
   // uint32_t spi_getTxBufferNum(MJL_SPI_S *const state, uint8_t * result);

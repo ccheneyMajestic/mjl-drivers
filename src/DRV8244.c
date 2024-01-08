@@ -61,13 +61,11 @@ const drv8244_cfg_s drv8244_config_default  = {
     state->fn_criticalSection_enter = cfg->fn_criticalSection_enter;
     /* Mark as initialized */
     state->_init = true;    
-    /* Reset the device */
-    error |= drv8244_stop(state);
   }
   return error;
 }
 
- /*******************************************************************************
+/*******************************************************************************
  * Function Name: drv8244_start()
  ********************************************************************************
  * \brief
@@ -85,6 +83,9 @@ const drv8244_cfg_s drv8244_config_default  = {
   if(state->_running){error|=ERROR_RUNNING;}
 
   if(!error) {
+    /* Reset the device */
+    error |= drv8244_stop(state);
+    /* Premark as running */
     state->_running = true;
     /* Enter the critical section */
     uint32_t interruptState = state->fn_criticalSection_enter();
@@ -112,7 +113,7 @@ const drv8244_cfg_s drv8244_config_default  = {
 }
 
 
- /*******************************************************************************
+/*******************************************************************************
  * Function Name: drv8244_stop()
  ********************************************************************************
  * \brief
@@ -138,7 +139,7 @@ const drv8244_cfg_s drv8244_config_default  = {
   return error;
 }
 
- /*******************************************************************************
+/*******************************************************************************
  * Function Name: drv8244_enable()
  ********************************************************************************
  * \brief

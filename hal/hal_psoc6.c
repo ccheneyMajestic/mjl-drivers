@@ -133,19 +133,20 @@ uint32_t spi_psoc6SCB_writeArray_blocking(const uint8_t *array, uint16_t len){
 }
 
 /*******************************************************************************
-* Function Name: spi_psoc6SCB_readArray_blocking()
+* Function Name: spi_psoc6SCB_read()
 ********************************************************************************
 * \brief
 *   Wrapper for an SCB Based SPI on PSoC6
-*   Read from the RX FIFO
+*   Place one element from the RX FIFO into the results buffer 
 *
 * \return
 *  Error code of the operation
 *******************************************************************************/
-uint32_t spi_psoc6SCB_readArray_blocking(uint8_t *results, uint16_t len) {
+uint32_t spi_psoc6SCB_read(uint8_t *result) {
   uint32_t error = 0;
-  /* Write out the data */
-  Cy_SCB_SPI_ReadArray(SPI_HW, (void *) results, len);
+  /* Move data from RX FIFO to results */
+  *result = Cy_SCB_SPI_Read(SPI_HW);
+  
   return error;
 }
 
@@ -176,11 +177,8 @@ uint32_t spi_psoc6SCB_setActive(uint8_t id){
 * \return
 *  Error code of the operation
 *******************************************************************************/
-uint32_t spi_psoc6SCB_getRxBufferNum(uint8_t *result){
-  uint32_t error = 0;
-  /* Write out the data */
-  *result = Cy_SCB_SPI_GetNumInRxFifo(SPI_HW);
-  return error;
+uint32_t spi_psoc6SCB_getRxBufferNum(void){
+  return Cy_SCB_SPI_GetNumInRxFifo(SPI_HW);
 }
 
 /*******************************************************************************
@@ -193,11 +191,8 @@ uint32_t spi_psoc6SCB_getRxBufferNum(uint8_t *result){
 * \return
 *  Error code of the operation
 *******************************************************************************/
-uint32_t spi_psoc6SCB_getTxBufferNum(uint8_t *result){
-  uint32_t error = 0;
-  /* Write out the data */
-  *result = Cy_SCB_SPI_GetNumInTxFifo(SPI_HW);
-  return error;
+uint32_t spi_psoc6SCB_getTxBufferNum(void){
+  return Cy_SCB_SPI_GetNumInTxFifo(SPI_HW);
 }
 
 /*******************************************************************************
