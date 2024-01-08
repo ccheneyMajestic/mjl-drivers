@@ -7,9 +7,16 @@
 *.log
 *.svd
 *.s
+*.icf
+*.ld
+*.scat
+*.mk
 
 .vscode/
 codegentemp/
 Generated_Source/
 CortexM0/
+CortexM0p/
+CortexM4/
 build/
+Export/

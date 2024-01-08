@@ -8,11 +8,11 @@
 *
 * Brief: Contains wrappers for the MJL library from the Cypress PSoC4 libraries
 *
-* 2023.04.27  - Document Created
+* 2023.09.11  - Document Created
 ********************************************************************************/
 /* Header Guard */
-#ifndef TEMPLATE_HAL_PSOC4_H
-  #define TEMPLATE_HAL_PSOC4_H
+#ifndef TFT_HAL_PSOC4_H
+  #define TFT_HAL_PSOC4_H
   /***************************************
   * Included files
   ***************************************/
@@ -21,20 +21,17 @@
   /***************************************
   * Macro Definitions
   ***************************************/
+
+  #define LED_ON  (0)
+  #define LED_OFF (1)
+  #define LEN_ROW 128
+  
   #define AUX_OFF             (0) /* Disable 3V3_AUX */
   #define AUX_ON              (1) /* Enable 3V3_AUX */  
-  #define ADC_CHAN_INA        (0) /* INA output */
-  #define ADC_CHAN_BATT_MON   (1) /* Battery monitory channel */
-  #define BATT_MON_RH         (20000.0)/* High side battery monitor resistor */
-  #define BATT_MON_RL         (5100.0) /* Low side battery monitor resistor */
-  #define BATT_MON_SCALE      ((BATT_MON_RH + BATT_MON_RL) / (BATT_MON_RL)) /* Scaling factor for the battery */
-  #define LEN_ROW 128
-
-  #define SL_SPI_ID_DISPLAY   (0) /* SPI Slave ID of the Display */
-  #define SL_SPI_ID_INA       (1) /* SPI Slave ID of the Instrumentation Amp */
-  #define SL_SPI_ID_FLASH     (2) /* SPI Slave ID of the Flash */
-  #define SPI_CS_ACTIVE       (0) /* Value to assert an active slave) */
-  #define SPI_CS_INACTIVE     (1) /* Value to disassert a slave) */
+  #define SPI_ID_LCD        (0) /* SPI Slave ID of the Display */
+  
+  #define SPI_CS_ACTIVE     (0) /* Active Chip Select */
+  #define SPI_CS_INACTIVE   (1) /* Inactive chip select */
   /***************************************
   * Enumerated types
   ***************************************/
@@ -42,7 +39,7 @@
   /***************************************
   * Structures 
   ***************************************/
-
+  extern MLJ_UART_S usb;
   /***************************************
   * Function declarations 
   ***************************************/
@@ -50,7 +47,9 @@
   uint32_t uart_psoc4SCB_stop(MLJ_UART_T *const state);
   uint32_t uart_psoc4SCB_writeArrayBlocking(const uint8_t *array, uint16_t len);
   uint32_t uart_psoc4SCB_read(uint8_t *data);
+  uint32_t hal_spi_scbWriteArrayBlocking(uint8_t slaveId, const uint8_t * cmdArray, uint16_t len);
+  uint32_t hal_spi_scbReadArrayBlocking(uint8_t slaveId, uint8_t * buffer, uint16_t len);
 
     
-#endif /* TEMPLATE_HAL_PSOC4_H */
+#endif /* TFT_HAL_PSOC4_H */
 /* [] END OF FILE */

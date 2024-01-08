@@ -11,6 +11,7 @@
 * 2023.04.26  - Document Created
 ********************************************************************************/
 #include "mjl_uart.h"
+#include "mjl_errors.h" 
 #include <stdarg.h>
 #include <stddef.h>
 #include "float.h"
@@ -281,8 +282,10 @@ uint32_t uart_print(MLJ_UART_S* state, const char *pszFmt) {
   if(!error){
     /* Find the length */
     uint16_t len=0;
+    /* Determine length by finding null */
     while(0 != pszFmt[len]){len++;}
-    state->hal_req_writeArray((uint8_t *) pszFmt, len);
+    /* Write the full array, if elements are present */
+    if(0 != len){state->hal_req_writeArray((uint8_t *) pszFmt, len);}
   }
   return error;
 }
@@ -665,7 +668,7 @@ uint32_t uart_printError(MLJ_UART_S* state, const char *description, uint32_t co
   uart_print(state, description);
   if(ERROR_NONE == code){error|=uart_println(state,": No Errors");}
   else {
-    error |= uart_println(state, ": Errors:");
+    uart_printlnf(state, ": Error 0x%x:", code);
     if(code & ERROR_POINTER){error|=uart_println(state," * Pointer");}
     if(code & ERROR_INIT){error|=uart_println(state," * Uninitialized");}
     if(code & ERROR_RUNNING){error|=uart_println(state," * Running");}
@@ -676,6 +679,7 @@ uint32_t uart_printError(MLJ_UART_S* state, const char *description, uint32_t co
     if(code & ERROR_MODE){error|=uart_println(state," * Mode");}
     if(code & ERROR_PARAM){error|=uart_println(state," * Param");}
     if(code & ERROR_UNAVAILABLE){error|=uart_println(state," * Unavailable");}
+    if(code & ERROR_STATE){error|=uart_println(state," * State");}
   }
   return error;
 }

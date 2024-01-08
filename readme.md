@@ -5,13 +5,24 @@ Middleware for embedded system
 
 # Usage
 
-## Building the library
-Use WSL to build 
+## Prerequisites
+### Windows
+1. Install Windows Subsystem for Linux (WSL)
 
-`make all` 
+1. Install `arm-none-eabi-gcc`
+    1. Download the latest Tarball from https://developer.arm.com/downloads/-/arm-gnu-toolchain-downloads
+    1. Unzip `sudo tar xjf gcc-arm-none-eabi-10.3-2021.10-x86_64-linux.tar.bz2 -C /mnt/wsl`
+    1. Symlink the binaries `sudo ln -s /mnt/wsl/gcc-arm-none-eabi-10.3-2021.10/bin/* /usr/bin/`
+    1. Ensure `arm-none-eabi-gcc --version` executes
+1. Ensure `zip` is installed `zip --version`
+    1. `sudo apt install zip`
+## Building the library
+1. Use WSL to build on Windows
+1. `make clean`
+1. `make all` 
 
 ## Configuration
-### PSoC Creator 
+### Static Libraries in PSoC Creator 
 1. Add file locations to project
     * Project → Build Settings
     * `Project Name` → `Compiler Name` → Complier → General
@@ -28,6 +39,10 @@ Use WSL to build
     * Add `mjl_drivers` to `Additional libraries`
         * NOTE: do _not_ include `'lib'` or `'.a'`
     * Add the library location to `Additional Library Directories`
+        * It is not required to include `.` if the library is in the source directory
+
+### Adding a template in PSoC Creator
+1. Right click a project and select `Copy to my templates` 
 
 
 ## Hardware Abstraction Layer (HAL)
