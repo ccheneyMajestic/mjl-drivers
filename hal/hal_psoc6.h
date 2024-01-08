@@ -18,6 +18,7 @@
   ***************************************/
   #include <stdint.h>
   #include "mjl_uart.h"
+  #include "mjl_spi.h"
   /***************************************
   * Macro Definitions
   ***************************************/
@@ -38,9 +39,16 @@
   uint32_t uart_psoc6SCB_stop(MLJ_UART_T *const state);
   uint32_t uart_psoc6SCB_writeArrayBlocking(const uint8_t *array, uint16_t len);
   uint32_t uart_psoc6SCB_read(uint8_t *data);
-  uint32_t spi_scbWriteArrayBlocking(uint8_t slaveId, uint8_t * cmdArray, uint16_t len);
-  uint32_t spi_scbReadArrayBlocking(uint8_t slaveId, uint8_t * buffer, uint16_t len);
 
+  uint32_t spi_psoc6SCB_start(MJL_SPI_T *const state);
+  uint32_t spi_psoc6SCB_stop(MJL_SPI_T *const state);
+  uint32_t spi_psoc6SCB_writeArray_blocking(const uint8_t *array, uint16_t len);
+  uint32_t spi_psoc6SCB_readArray_blocking(uint8_t *results, uint16_t len);
+  uint32_t spi_psoc6SCB_setActive(uint8_t id);
+  uint32_t spi_psoc6SCB_getRxBufferNum(uint8_t *result);
+  uint32_t spi_psoc6SCB_getTxBufferNum(uint8_t *result);
+  uint32_t spi_psoc6SCB_clearRxBuffer(void);
+  uint32_t spi_psoc6SCB_clearTxBuffer(void);
     
 #endif /* HAL_PSOC6_H */
 /* [] END OF FILE */

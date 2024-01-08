@@ -80,6 +80,160 @@ uint32_t uart_psoc6SCB_read(uint8_t *data){
 }
 
 
+
+/*******************************************************************************
+* Function Name: spi_psoc6SCB_start()
+********************************************************************************
+* \brief
+*   Wrapper for an SCB Based SPI on PSoC6
+*   Start the SCB Block
+*
+* \return
+*  Error code of the operation
+*******************************************************************************/
+uint32_t spi_psoc6SCB_start(MJL_SPI_T *const state){
+  uint32_t error = 0;
+  (void) state;
+  SPI_Start();
+  return error;
+}
+
+/*******************************************************************************
+* Function Name: spi_psoc6SCB_stop()
+********************************************************************************
+* \brief
+*   Wrapper for an SCB Based SPI on PSoC6
+*   Stop the SCB blcok
+*
+* \return
+*  Error code of the operation
+*******************************************************************************/
+uint32_t spi_psoc6SCB_stop(MJL_SPI_T *const state){
+  uint32_t error = 0;
+  (void) state;
+  Cy_SCB_SPI_Disable(SPI_HW, &SPI_context);
+  return error;
+}
+
+/*******************************************************************************
+* Function Name: spi_psoc6SCB_writeArray_blocking()
+********************************************************************************
+* \brief
+*   Wrapper for an SCB Based SPI on PSoC6
+*   Write an array of elements
+*
+* \return
+*  Error code of the operation
+*******************************************************************************/
+uint32_t spi_psoc6SCB_writeArray_blocking(const uint8_t *array, uint16_t len){
+  uint32_t error = 0;
+  /* Write out the data */
+  Cy_SCB_SPI_WriteArrayBlocking(SPI_HW, (void *) array, len);
+  return error;
+}
+
+/*******************************************************************************
+* Function Name: spi_psoc6SCB_readArray_blocking()
+********************************************************************************
+* \brief
+*   Wrapper for an SCB Based SPI on PSoC6
+*   Read from the RX FIFO
+*
+* \return
+*  Error code of the operation
+*******************************************************************************/
+uint32_t spi_psoc6SCB_readArray_blocking(uint8_t *results, uint16_t len) {
+  uint32_t error = 0;
+  /* Write out the data */
+  Cy_SCB_SPI_ReadArray(SPI_HW, (void *) results, len);
+  return error;
+}
+
+/*******************************************************************************
+* Function Name: spi_psoc6SCB_setActive()
+********************************************************************************
+* \brief
+*   Wrapper for an SCB Based SPI on PSoC6
+*   Sets an active slave 
+*
+* \return
+*  Error code of the operation
+*******************************************************************************/
+uint32_t spi_psoc6SCB_setActive(uint8_t id){
+  uint32_t error = 0;
+  /* Write out the data */
+  Cy_SCB_SPI_SetActiveSlaveSelect(SPI_HW, id);
+  return error;
+}
+
+/*******************************************************************************
+* Function Name: spi_psoc6SCB_getRxBufferNum()
+********************************************************************************
+* \brief
+*   Wrapper for an SCB Based SPI on PSoC6
+*   Return the number of elements in the receive buffer
+*
+* \return
+*  Error code of the operation
+*******************************************************************************/
+uint32_t spi_psoc6SCB_getRxBufferNum(uint8_t *result){
+  uint32_t error = 0;
+  /* Write out the data */
+  *result = Cy_SCB_SPI_GetNumInRxFifo(SPI_HW);
+  return error;
+}
+
+/*******************************************************************************
+* Function Name: spi_psoc6SCB_getTxBufferNum()
+********************************************************************************
+* \brief
+*   Wrapper for an SCB Based SPI on PSoC6
+*   Return the number of elements in the transmit buffer
+*
+* \return
+*  Error code of the operation
+*******************************************************************************/
+uint32_t spi_psoc6SCB_getTxBufferNum(uint8_t *result){
+  uint32_t error = 0;
+  /* Write out the data */
+  *result = Cy_SCB_SPI_GetNumInTxFifo(SPI_HW);
+  return error;
+}
+
+/*******************************************************************************
+* Function Name: spi_psoc6SCB_clearRxBuffer()
+********************************************************************************
+* \brief
+*   Wrapper for an SCB Based SPI on PSoC6
+*   Clear all of the elements in the receive buffer 
+*
+* \return
+*  Error code of the operation
+*******************************************************************************/
+uint32_t spi_psoc6SCB_clearRxBuffer(void) {
+  uint32_t error = 0;
+  Cy_SCB_SPI_ClearRxFifo(SPI_HW);
+  return error;
+}
+
+/*******************************************************************************
+* Function Name: spi_psoc6SCB_clearTxBuffer()
+********************************************************************************
+* \brief
+*   Wrapper for an SCB Based SPI on PSoC6
+*   Clear all of the elements in the transmit buffer 
+*
+* \return
+*  Error code of the operation
+*******************************************************************************/
+uint32_t spi_psoc6SCB_clearTxBuffer(void) {
+  uint32_t error = 0;
+  Cy_SCB_SPI_ClearTxFifo(SPI_HW);
+  return error;
+}
+
+
+
 /*******************************************************************************
 * Function Name: spi_scbWriteArrayBlocking()
 ********************************************************************************

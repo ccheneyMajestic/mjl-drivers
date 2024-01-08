@@ -34,7 +34,7 @@
   /* Configuration Structure */
   typedef struct {
     uint32_t (*req_hal_writeArray)(const uint8_t *array, uint16_t len);  /* Write data into the TX buffer */
-    uint32_t (*req_hal_read)(uint8_t *result);                           /* Move data from the RX buffer to the result */
+    uint32_t (*req_hal_readArray)(uint8_t *results, uint16_t len);       /* Move data from the RX buffer to the result */
     uint32_t (*req_hal_setActive) (uint8_t id);                          /* Set the Slave with given ID active */
     uint32_t (*req_hal_getRxBufferNum) (uint8_t *result);                /* Get the number of elements in the Receive Buffer */
     uint32_t (*req_hal_getTxBufferNum) (uint8_t *result);                /* Get the number of elements in the Transmit Buffer */
@@ -47,7 +47,7 @@
   /* Serial State Object   */
   typedef struct {
     uint32_t (*req_hal_writeArray)(const uint8_t *array, uint16_t len);  /* Write data into the TX buffer */
-    uint32_t (*req_hal_read)(uint8_t *result);                           /* Move data from the RX buffer to the result */
+    uint32_t (*req_hal_readArray)(uint8_t *results, uint16_t len);                           /* Move data from the RX buffer to the result */
     uint32_t (*req_hal_setActive) (uint8_t id);                          /* Set the Slave with given ID active */
     uint32_t (*req_hal_getRxBufferNum) (uint8_t *result);                /* Get the number of elements in the Receive Buffer */
     uint32_t (*req_hal_getTxBufferNum) (uint8_t *result);                /* Get the number of elements in the Transmit Buffer */
@@ -58,7 +58,6 @@
 
     bool _init;
     bool _running;
-    bool isLoggingEnabled;
   } MJL_SPI_S;
 
   /* Default config struct */
@@ -70,83 +69,17 @@
   uint32_t spi_init(MJL_SPI_S *const state, MJL_SPI_CFG_S *const cfg);
   uint32_t spi_start(MJL_SPI_S *const state);
   uint32_t spi_stop(MJL_SPI_S *const state);
-
-  uint32_t spi_write(MJL_SPI_S *const state, uint8_t id, uint8_t data);
-  uint32_t spi_read(MJL_SPI_S *const state,  uint8_t id, uint8_t * data);
   uint32_t spi_writeArray(MJL_SPI_S *const state, uint8_t id, uint8_t * array, uint16_t len);
   uint32_t spi_readArray(MJL_SPI_S *const state,  uint8_t id, uint8_t * array, uint16_t len);
-  uint32_t spi_getRxBufferNum(MJL_SPI_S *const state, uint8_t * result);
-  uint32_t spi_getTxBufferNum(MJL_SPI_S *const state, uint8_t * result);
-  uint32_t spi_clearRxBuffer(MJL_SPI_S *const state, uint8_t * result);
-  uint32_t spi_clearTxBuffer(MJL_SPI_S *const state, uint8_t * result);
-  // uint32_t spi_setActive(MJL_SPI_S *const state, uint8_t id);
+
+  // uint32_t spi_write(MJL_SPI_S *const state, uint8_t id, uint8_t data);
+  // uint32_t spi_read(MJL_SPI_S *const state,  uint8_t id, uint8_t * data);
+
+  // uint32_t spi_getRxBufferNum(MJL_SPI_S *const state, uint8_t * result);
+  // uint32_t spi_getTxBufferNum(MJL_SPI_S *const state, uint8_t * result);
+  // uint32_t spi_clearRxBuffer(MJL_SPI_S *const state, uint8_t * result);
+  // uint32_t spi_clearTxBuffer(MJL_SPI_S *const state, uint8_t * result);
 
     
 #endif /* MJL_SPI_H */
 /* [] END OF FILE */
-
-
-// /***************************************************************************
-// *                              Impact Biosystems © 2021
-// *                               
-// *
-// * File: PSoC6_SPI.h
-// * Workspace: 05_Gen2
-// * Project: scannerDriver_v4.0
-// * Version: 1.0.0
-// * Authors: E. Burba
-// * 
-// * PCB: Scanner Driver v4.0.0
-// * mcuType: PSoC 6 BLE Module
-// *
-// * Brief:
-// *   Header for PSoC6_SPI.c
-// *
-// * 2021.08.03 - EB Document Created
-// ********************************************************************************/
-
-// /* Header Guard */
-// #ifndef SPI_PSOC6_H
-//     #define SPI_PSOC6_H
-//     /***************************************
-//     * Included files
-//     ***************************************/
-//     #include <stdint.h>
-//     #include "micaCommon.h"
-//     #include "micaComms.h"
-//     /***************************************
-//     * Macro Definitions
-//     ***************************************/
-    
-//     //    #define SPI_PSOC_ERROR_NONE         (0) /**< No error occurred (or no error detection present) */
-// //    
-// //    #define SPI_PSOC_FLAG_NO_DATA       (0) /**< No Data was received */
-// //    #define SPI_PSOC_FLAG_PENDING_RX    (1) /**< Data was already in the queue */
-// //    
-// //    #define SPI_PSOC_ERROR_NO_DATA      (1u << SPI_PSOC_FLAG_NO_DATA) /**< No Data was received */
-// //    #define SPI_PSOC_ERROR_PENDING_RX   (1u << SPI_PSOC_FLAG_PENDING_RX) /**< Data was already in the queue */
-    
-    
-//     /***************************************
-//     * Enumerated Types
-//     ***************************************/
-
-    
-//     /***************************************
-//     * Structures
-//     ***************************************/
-
-//     /***************************************
-//     * Function declarations 
-//     ***************************************/ 
-//     uint32_t spiPsoc6_start(COMMS_SPI_S *spi);
-//     uint32_t spiPsoc6_setActive(uint8_t id);
-//     uint32_t spiPsoc6_write(uint8_t addr, uint8_t val);
-//     uint32_t spiPsoc6_read(uint8_t addr, uint8_t *ret);
-//     uint32_t spiPsoc6_writeArray(uint8_t addr, uint8_t* array, uint16_t len);
-//     uint32_t spiPsoc6_readArray(uint8_t addr, uint8_t* array, uint16_t len);
-//     uint32_t spiPsoc6_getRxBufferSize(uint8_t *result);
-//     uint32_t spiPsoc6_getTxBufferSize(uint8_t *result);
-//     uint32_t spiPsoc6_clearRxBuffer(void);
-//     uint32_t spiPsoc6_clearTxBuffer(void);
-// #endif
