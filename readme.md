@@ -10,18 +10,19 @@ Middleware for embedded system
 1. Install Windows Subsystem for Linux (WSL)
 
 1. Install `arm-none-eabi-gcc`
-    1. Download the latest Tarball from https://developer.arm.com/downloads/-/gnu-rm
-    1. Unzip `sudo tar xjf gcc-arm-none-eabi-10.3-2021.10-x86_64-linux.tar.bz2  -C /mnt/wsl`
-    1. Symlink the binaries `sudo ln -s /mnt/wsl/gcc-arm-none-eabi-10.3-2021.10/bin/* /usr/bin/`
-    1. Ensure `arm-none-eabi-gcc --version` execute
-
+    1. Download the latest Tarball from https://developer.arm.com/downloads/-/arm-gnu-toolchain-downloads
+    1. Unzip `sudo tar xjf gcc-arm-none-eabi-10.3-2021.10-x86_64-linux.tar.bz2 -C /mnt/wsl`
+    1. Copy the binaries `sudo cp gcc-arm-none-eabi-10.3-2021.10/bin/* /usr/bin/`
+    1. Ensure `arm-none-eabi-gcc --version` executes
+1. Ensure `zip` is installed `zip --version`
+    1. `sudo apt install zip`
 ## Building the library
 1. Use WSL to build on Windows
 1. `make clean`
 1. `make all` 
 
 ## Configuration
-### PSoC Creator 
+### Static Libraries in PSoC Creator 
 1. Add file locations to project
     * Project → Build Settings
     * `Project Name` → `Compiler Name` → Complier → General
@@ -39,6 +40,9 @@ Middleware for embedded system
         * NOTE: do _not_ include `'lib'` or `'.a'`
     * Add the library location to `Additional Library Directories`
         * It is not required to include `.` if the library is in the source directory
+
+### Adding a template in PSoC Creator
+1. Right click a project and select `Copy to my templates` 
 
 
 ## Hardware Abstraction Layer (HAL)

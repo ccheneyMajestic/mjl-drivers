@@ -12,15 +12,17 @@ FLAGS_cortex-m4 := -mfloat-abi=hard -mfpu=fpv4-sp-d16
 CC = arm-none-eabi-gcc
 AR = arm-none-eabi-ar
 CFLAGS  = -mcpu=$(TARGET) -mthumb -Wall -O2 -ffunction-sections -ffat-lto-objects
-ASFLAGS = -mcpu=$(TARGET) -mthumb -Wa,-alh=./build/$@/
+ASFLAGS = -mcpu=$(TARGET) -mthumb -Wa,-alh=$(BUILD_DIR)/$@/
 LDFLAGS = -mcpu=$(TARGET) -mthumb --specs=nosys.specs
 
 
-# Directories
+# Constants
 INCLUDE_DIRS = ./include
 SOURCE_DIRS = ./src
 BUILD_DIR = ./build
 OBJ_DIR = obj
+INC_DIR = include
+LIB_NAME = libmjl_drivers
 
 # Sources and objects
 LIB_SOURCES = $(wildcard $(SOURCE_DIRS)/*.c)
@@ -29,13 +31,14 @@ VERSION := $(shell cat $(VERSION_FILE))
 NEW_VERSION := $(shell echo $$(($(VERSION)+1)))
 
 # Library
-LIBRARY = ./build/$(TARGET)/libmjl_drivers_v$(NEW_VERSION)_$(TARGET).a
+FULL_NAME = $(LIB_NAME)_v$(NEW_VERSION)_$(TARGET)
+LIBRARY = $(BUILD_DIR)/$(TARGET)/$(FULL_NAME).a
 
 # Build library for all targets
 all: update_version $(TARGETS)
 
 # For each target, create the object directory
-$(TARGETS): %: $(BUILD_DIR)/%/$(OBJ_DIR)
+$(TARGETS): %: $(BUILD_DIR)/%/$(OBJ_DIR) 
 	@echo "Building target $@"
 	$(MAKE) TARGET=$@ build_library
 
@@ -51,9 +54,11 @@ OBJS = $(LIB_SOURCES:$(SOURCE_DIRS)/%.c=$(BUILD_DIR)/$(TARGET)/$(OBJ_DIR)/%.o)
 
 # Package the objects into a library 
 $(LIBRARY): $(OBJS)
-	$(AR) rcs $@ $^
+	$(AR) rcs $@ $^ 
+	zip $(BUILD_DIR)/$(TARGET)/$(FULL_NAME).zip -j $@
+	zip -r $(BUILD_DIR)/$(TARGET)/$(FULL_NAME).zip $(INCLUDE_DIRS) > /dev/null
+	rm $@
 	@echo "Created Libary $@"
-
 
 # Create an object for each .o for each target 
 $(BUILD_DIR)/$(TARGET)/$(OBJ_DIR)/%.o: $(SOURCE_DIRS)/%.c

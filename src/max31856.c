@@ -78,7 +78,7 @@ uint32_t max31856_start(max31856_state_s *const state){
     uint8_t CR1_val = (MAX31856_CR1_MASK_TC_K | MAX31856_CR1_MASK_AVG4);
     error |= max31856_writeReg(state, MAX31856_CR1_ADDR, CR1_val);
     /* Read back the config register */
-    uint8_t readVal;
+    uint8_t readVal = 0;
     error |= max31856_readReg(state, MAX31856_CR1_ADDR, &readVal);
     if(error || (readVal != CR1_val)) {
       error = ERROR_VAL;
