@@ -73,12 +73,6 @@
   uint32_t spi_readArray(MJL_SPI_S *const state,  uint8_t id, uint8_t * array, uint16_t len);
   uint32_t spi_write(MJL_SPI_S *const state, uint8_t id, uint8_t data);
   uint32_t spi_read(MJL_SPI_S *const state,  uint8_t id, uint8_t * data);
-
-  // uint32_t spi_getRxBufferNum(MJL_SPI_S *const state, uint8_t * result);
-  // uint32_t spi_getTxBufferNum(MJL_SPI_S *const state, uint8_t * result);
-  // uint32_t spi_clearRxBuffer(MJL_SPI_S *const state, uint8_t * result);
-  // uint32_t spi_clearTxBuffer(MJL_SPI_S *const state, uint8_t * result);
-
     
 #endif /* MJL_SPI_H */
 /* [] END OF FILE */
