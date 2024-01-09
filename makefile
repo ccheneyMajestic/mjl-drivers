@@ -21,6 +21,7 @@ LDFLAGS = -mcpu=$(TARGET) -mthumb --specs=nosys.specs
 INCLUDE_DIRS = ./include
 SOURCE_DIRS = ./src
 BUILD_DIR = ./build
+HAL_DIR = ./hal
 OBJ_DIR = obj
 INC_DIR = include
 LIB_NAME = libmjl_drivers
@@ -63,6 +64,7 @@ $(LIBRARY): $(OBJS)
 	$(eval ZIP :=  $(BUILD_DIR)/$(TARGET)/$(FULL_NAME).zip)
 	zip $(ZIP) -j $@ > /dev/null
 	zip -r $(ZIP) $(INCLUDE_DIRS) > /dev/null
+	zip -r $(ZIP) $(HAL_DIR) > /dev/null
 	rm $@
 	@echo " * Created Libary $(ZIP)"
 
