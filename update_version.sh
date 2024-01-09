@@ -1,4 +1,5 @@
 #!/bin/bash
+# Created by C. Cheney on 2024.01.09
 
 # Read the current version from version.txt
 current_version=$(cat version.txt)

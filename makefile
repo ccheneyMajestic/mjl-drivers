@@ -1,13 +1,11 @@
-# Majestic Labs Drivers
-# C. Cheney 2023.06.08
-# Build using WSL on Windows
-# Updated by C. Cheney 2023.12.30
-
+# Make file for the Majestic Labs Drivers
+# Created on 2023.06.08 by C. Cheney
+# Example usage: 
+# $ make clean && make
 
 # Compiler and linker settings
 TARGETS := cortex-m0 cortex-m0plus cortex-m4
-# TARGETS := cortex-m0
-# # Platform specific flags
+# Platform specific flags
 FLAGS_cortex-m4 := -mfloat-abi=hard -mfpu=fpv4-sp-d16
 # Common flags
 CC = arm-none-eabi-gcc
@@ -15,7 +13,6 @@ AR = arm-none-eabi-ar
 CFLAGS  = -mcpu=$(TARGET) -mthumb -Wall -O2 -ffunction-sections -ffat-lto-objects
 ASFLAGS = -mcpu=$(TARGET) -mthumb -Wa,-alh=$(BUILD_DIR)/$@/
 LDFLAGS = -mcpu=$(TARGET) -mthumb --specs=nosys.specs
-
 
 # Constants
 INCLUDE_DIRS = ./include

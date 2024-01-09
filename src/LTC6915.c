@@ -11,14 +11,15 @@
 * 2023.04.25  - Document Created
 ********************************************************************************/
 #include "LTC6915.h" 
+#include "mjl_errors.h"
 
 /* Default configuration structure */
-const LTC6915_cfg_s ltc6915_default = {
+const LTC6915_cfg_s ltc6915_cfg_default = {
   .fn_pin_D0_Write = NULL, 
   .fn_pin_D1_Write = NULL,
   .fn_pin_D2_Write = NULL,
   .fn_pin_D3_Write = NULL,
-  .fn_spiWriteArray = NULL,
+  .spi = NULL,
   .mode = 0,
   .gainWord = 0,
   .slaveId = 0,
@@ -43,8 +44,9 @@ uint32_t ltc6915_init(LTC6915_S *const state, LTC6915_cfg_s *const cfg){
   uint32_t error = 0;
   /* Verify Communication Functions */
   if (LTC6915_MODE_SERIAL == cfg->mode){
-    /* Check SPI functions */
-    error |= (NULL == cfg->fn_spiWriteArray) ? ERROR_POINTER : ERROR_NONE;
+    /* Ensure SPI is present and initialized*/
+    error |= (NULL == cfg->spi) ? ERROR_POINTER : ERROR_NONE;
+    error |= (false == cfg->spi->_init) ? ERROR_INIT : ERROR_NONE;
     /* slaveID: No limitation on value */
   }
   /* Parallel control */
@@ -66,7 +68,7 @@ uint32_t ltc6915_init(LTC6915_S *const state, LTC6915_cfg_s *const cfg){
     state->gainWord = cfg->gainWord;
     /* Copy the relevant communications */
     if (LTC6915_MODE_SERIAL == cfg->mode){
-      state->fn_spiWriteArray = cfg->fn_spiWriteArray;
+      state->spi = cfg->spi;
     }
     else if(LTC6915_MODE_PARALLEL == cfg->mode){
       state->fn_pin_D0_Write = cfg->fn_pin_D0_Write;
@@ -100,6 +102,7 @@ uint32_t ltc6915_start(LTC6915_S *const state) {
   uint32_t error = 0;
   if(!state->_init){error|=ERROR_INIT;}
   if(state->_running){error|=ERROR_RUNNING;}
+  if(!state->spi->_running){error|=ERROR_MODE;}
 
   if(!error){
     /* Pre-mark as running */
@@ -161,7 +164,7 @@ uint32_t ltc6915_stop(LTC6915_S *const state) {
     if(!error){
       if(LTC6915_MODE_SERIAL == state->mode){
         uint8_t data = (uint8_t) gainWord;
-        error |= state->fn_spiWriteArray(state->slaveId, &data, 1);
+        error |= spi_write(state->spi, state->slaveId, data);
       }
       else if (LTC6915_MODE_PARALLEL == state->mode){
         state->fn_pin_D0_Write((bool) (gainWord & LTC6915_MASK_D0));
