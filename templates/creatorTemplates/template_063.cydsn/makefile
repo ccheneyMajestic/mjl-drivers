@@ -258,7 +258,7 @@ $(OUT_DIR_CortexM0p)/%.o : gcc/%.S
 	@"$(CC)" $(CDEPGEN_CortexM0p)
 	"$(CC)" -c $(CFLAGS_CortexM0p) $< -o $@
 
-$(OUT_DIR_CortexM0p)/%.o : mjl_drivers/hal/%.c
+$(OUT_DIR_CortexM0p)/%.o : libmjl_drivers_v1.0.183_cortex-m4/hal/psoc6/%.c
 	@mkdir -p $(OUT_DIR_CortexM0p)
 	@"$(CC)" $(CDEPGEN_CortexM0p)
 	"$(CC)" -c $(CFLAGS_CortexM0p) $< -o $@

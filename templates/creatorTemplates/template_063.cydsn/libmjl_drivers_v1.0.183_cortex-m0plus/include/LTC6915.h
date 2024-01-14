@@ -17,7 +17,7 @@
   * Included files
   ***************************************/
   #include <stdbool.h>
-  #include <mjl_errors.h>
+  #include "mjl_spi.h"
   /***************************************
   * Macro Definitions
   ***************************************/
@@ -59,7 +59,7 @@
     void (*fn_pin_D1_Write) (uint8_t val);    /* Generic function to write D1 pin state in parallel mode */
     void (*fn_pin_D2_Write) (uint8_t val);    /* Generic function to write D2 pin state in parallel mode */
     void (*fn_pin_D3_Write) (uint8_t val);    /* Generic function to write D3 pin state in parallel mode */
-    uint32_t (*fn_spiWriteArray) (uint8_t slaveId, const uint8_t * cmdArray, uint16_t len); /* SPI write function for parallel mode */
+    MJL_SPI_S *spi;  /* SPI communication struct */
     LTC6915_MODE_T mode;    /* The mode of the device */
     LTC6915_GAIN_T gainWord;   /* Gain word of the amp */
     uint8_t slaveId; 
@@ -72,7 +72,7 @@
     void (*fn_pin_D1_Write) (uint8_t val);    /* Generic function to write D1 pin state in parallel mode */
     void (*fn_pin_D2_Write) (uint8_t val);    /* Generic function to write D2 pin state in parallel mode */
     void (*fn_pin_D3_Write) (uint8_t val);    /* Generic function to write D3 pin state in parallel mode */
-    uint32_t (*fn_spiWriteArray) (uint8_t slaveId, const uint8_t * cmdArray, uint16_t len); /* SPI write function for parallel mode */
+    MJL_SPI_S *spi;  /* SPI communication struct */
 
     LTC6915_MODE_T mode;    /* The mode of the device */
     LTC6915_GAIN_T gainWord;   /* Gain word of the amp */
@@ -81,7 +81,7 @@
     bool _running;  /* Is the device running */
   } LTC6915_S;
 
-  extern const LTC6915_cfg_s ltc6915_default;
+  extern const LTC6915_cfg_s ltc6915_cfg_default;
   /***************************************
   * Function declarations 
   ***************************************/
