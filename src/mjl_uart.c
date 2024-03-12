@@ -319,39 +319,6 @@ uint32_t uart_println(MLJ_UART_S *const state, const char * pszFmt){
   return error;
 }
 
-
-// /*******************************************************************************
-// * Function Name: uart_printlnf()
-// ********************************************************************************
-// * \brief
-// *   Prints a formatted zero terminated string out on the uart followed by a newline and 
-// * Carriage return 
-// *
-// * \param state [in/out]
-// * Pointer to the state struct
-// *
-// * \param pszFmt [in]
-// * Pointer to a zero-terminated string
-// * 
-// * \return
-// *  Error code of the operation
-// *******************************************************************************/
-// uint32_t uart_printlnf(MLJ_UART_S* state, const char *pszFmt,...){
-//   uint32_t error = 0;
-//   if(!state->_init){error|=ERROR_INIT;}
-//   if(!state->_running){error|=ERROR_STOPPED;}
-//   if(!state->isLoggingEnabled){error|=ERROR_MODE;}
-
-//   if(!error){
-//     va_list args;
-//     va_start(args, pszFmt);
-//     error |= uart_printf(state, pszFmt, args);
-//     error |= uart_print(state, "\r\n");
-//     va_end(args);
-//   }
-//   return error;
-// }
-
 /*******************************************************************************
 * Function Name: uart_printf()
 ********************************************************************************
@@ -405,11 +372,34 @@ uint32_t uart_printf(MLJ_UART_S* state, const char *pszFmt,...) {
         pszFmt++;
         continue;
       }
-      /* Format integer */
-      else if(*pszFmt == 'd' || *pszFmt == 'i') {
+      /* Format unsigned integer */
+      else if(*pszFmt == 'u'){
         uint32_t iVal = va_arg(args, uint32_t);
         uint8_t i = 0;
         uint8_t buffer[25];
+        do{
+          buffer[i++] = iVal % 10;
+          iVal /= 10;
+        }while(iVal);
+        while(i > 0){
+          i--;
+          uint8_t ascii = 0;
+          error |= uart_hex2Ascii(buffer[i], &ascii);
+          error |= state->hal_req_writeArray(&ascii,1);
+        }
+        pszFmt++;
+        continue;
+      }
+      /* Format signed integer */
+      else if(*pszFmt == 'd' || *pszFmt == 'i') {
+        int32_t iVal = va_arg(args, int32_t);
+        uint8_t i = 0;
+        uint8_t buffer[25];
+        /* Check for negative numbers */
+        if (iVal < 0){
+          iVal *= -1;
+          uart_write(state, '-');
+        }
         do{
           buffer[i++] = iVal % 10;
           iVal /= 10;
@@ -498,12 +488,12 @@ uint32_t uart_printf(MLJ_UART_S* state, const char *pszFmt,...) {
           continue;
         }
         else if (val < -DBL_MAX){
-          uart_print(state, "fni-");
+          uart_print(state, "-inf");
           pszFmt++;
           continue;
         }
         else if (val > DBL_MAX) {
-          uart_print(state, "fni+");
+          uart_print(state, "+inf");
           pszFmt++;
           continue;
         }
