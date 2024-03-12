@@ -405,11 +405,36 @@ uint32_t uart_printf(MLJ_UART_S* state, const char *pszFmt,...) {
         pszFmt++;
         continue;
       }
-      /* Format integer */
-      else if(*pszFmt == 'd' || *pszFmt == 'i') {
+      /* Format unsigned integer */
+      else if(*pszFmt == 'u'){
         uint32_t iVal = va_arg(args, uint32_t);
         uint8_t i = 0;
         uint8_t buffer[25];
+        do{
+          buffer[i++] = iVal % 10;
+          iVal /= 10;
+        }while(iVal);
+        while(i > 0){
+          i--;
+          uint8_t ascii = 0;
+          error |= uart_hex2Ascii(buffer[i], &ascii);
+          error |= state->hal_req_writeArray(&ascii,1);
+        }
+        pszFmt++;
+        continue;
+      }
+      /* Format signed integer */
+      else if(*pszFmt == 'd' || *pszFmt == 'i') {
+        int32_t iVal = va_arg(args, int32_t);
+        uint8_t i = 0;
+        uint8_t buffer[25];
+        /* Check for negative numbers */
+        bool isNeg = false;
+        if (iVal < 0){
+          isNeg = true;
+          iVal *= -1;
+          uart_write(state, '-');
+        }
         do{
           buffer[i++] = iVal % 10;
           iVal /= 10;
@@ -498,12 +523,12 @@ uint32_t uart_printf(MLJ_UART_S* state, const char *pszFmt,...) {
           continue;
         }
         else if (val < -DBL_MAX){
-          uart_print(state, "fni-");
+          uart_print(state, "-inf");
           pszFmt++;
           continue;
         }
         else if (val > DBL_MAX) {
-          uart_print(state, "fni+");
+          uart_print(state, "+inf");
           pszFmt++;
           continue;
         }
