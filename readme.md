@@ -12,6 +12,7 @@ Middleware for embedded system
 1. Install `arm-none-eabi-gcc`
     1. Download the latest Tarball from https://developer.arm.com/downloads/-/arm-gnu-toolchain-downloads
     1. Unzip `sudo tar xjf gcc-arm-none-eabi-10.3-2021.10-x86_64-linux.tar.bz2 -C /mnt/wsl`
+        1. Use full paths when symlinking
     1. Symlink the binaries `sudo ln -s /mnt/wsl/gcc-arm-none-eabi-10.3-2021.10/bin/* /usr/bin/`
     1. Ensure `arm-none-eabi-gcc --version` executes
 1. Ensure `zip` is installed `zip --version`
