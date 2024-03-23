@@ -49,6 +49,10 @@
   uint32_t spi_psoc6SCB_getTxBufferNum(void);
   uint32_t spi_psoc6SCB_clearRxBuffer(void);
   uint32_t spi_psoc6SCB_clearTxBuffer(void);
+  
+  void hal_drv_pin_sleep_write(uint32_t val);
+  void hal_drv_pin_drvoff_write(uint32_t val);
+  uint32_t hal_drv_pin_nfault_read(void);
     
 #endif /* HAL_PSOC6_H */
 /* [] END OF FILE */

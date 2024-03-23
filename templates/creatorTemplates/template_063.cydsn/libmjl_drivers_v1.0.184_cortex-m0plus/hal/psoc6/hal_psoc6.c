@@ -227,87 +227,42 @@ uint32_t spi_psoc6SCB_clearTxBuffer(void) {
   return error;
 }
 
-
-
 /*******************************************************************************
-* Function Name: spi_scbWriteArrayBlocking()
+* Function Name: hal_drv_pin_sleep_write()
 ********************************************************************************
 * \brief
-*   Write an array of data via SPI using the SCB api. This is a blocking function
+*   Control the nSLEEP pin
 *
 * \return
 *  Error code of the operation
 *******************************************************************************/
-uint32_t spi_scbWriteArrayBlocking(uint8_t slaveId, uint8_t * cmdArray, uint16_t len) {
-    uint32_t error = 0;
-//    /* Bit bang CS line */
-//    error |= spi_assertSlave(slaveId);
-//    /* Place the array into the TX buffer */
-//    SPI_SpiUartPutArray(cmdArray, len);
-//    if(!error){
-//        /* Wait for the write buffer to complete */
-//        uint16_t count = 0;
-//        /* Wait until data has been shifted in */
-//        while(!SPI_SpiIsBusBusy()){
-//            if(++count == 0){
-//                error=ERROR_TIMEOUT;
-//                // printLn(&usb, "SPI 'Done' Timeout");
-//                break;
-//            }    
-//        }
-//        /* Wait until data has been shifted out */
-//        if(!error){
-//            count = 0;
-//            while(SPI_SpiIsBusBusy()){
-//                if(++count == 0){
-//                    error=ERROR_TIMEOUT;
-//                    // printLn(&usb, "SPI 'Done' Timeout");
-//                    break;
-//                }    
-//            }   
-//        }
-//    }
-//    /* Bit bang CS line */
-//    spi_disassertSlave();
-//    
-    return error;
+void hal_drv_pin_sleep_write(uint32_t val) {
+  Cy_GPIO_Write(pin_DRV_nSLEEP_0_PORT, pin_DRV_nSLEEP_0_NUM, val);
 }
 
 /*******************************************************************************
-* Function Name: spi_scbReadArrayBlocking()
+* Function Name: hal_drv_pin_drvoff_write()
 ********************************************************************************
 * \brief
-*   Read an array of data via SPI using the SCB api. Clears the RX buffer before 
-*   reading. This is a blocking function.
+*   Control the DRVOFF pin
 *
-* \param slaveId [in]
-*   ID of the slave to read from
-*   
-* \param buffer [out]
-*   Pointer to the buffer that the results will be placed into
-*
-* \param len [in]
-*   Number of elements to be read 
-* 
 * \return
 *  Error code of the operation
 *******************************************************************************/
-uint32_t spi_scbReadArrayBlocking(uint8_t slaveId, uint8_t * buffer, uint16_t len) {
-    uint32_t error = 0;
-//    /* Clear the RX buffer */
-//    SPI_SpiUartClearRxBuffer();
-//    /* Use the buffer as temp storage for the dummy write*/
-//    memset(buffer, 0, len);
-//    spi_scbWriteArrayBlocking(slaveId, buffer, len);
-//    for(uint8_t i = 0; i<len; i++){
-//        if(SPI_SpiUartGetRxBufferSize()){
-//            buffer[i] = SPI_SpiUartReadRxData();
-//        }
-//        else{
-//            error |= ERROR_INVALID;
-//            break;
-//        }
-//    }
-    return error;
+void hal_drv_pin_drvoff_write(uint32_t val) {
+  Cy_GPIO_Write(pin_DRV_DRVOFF_0_PORT, pin_DRV_DRVOFF_0_NUM, val);
+}
+
+/*******************************************************************************
+* Function Name: hal_drv_pin_nfault_read()
+********************************************************************************
+* \brief
+*   Read the nFault pin
+*
+* \return
+*  Error code of the operation
+*******************************************************************************/
+uint32_t hal_drv_pin_nfault_read(void){
+  return Cy_GPIO_Read(pin_DRV_nFAULT_PORT, pin_DRV_nFAULT_NUM); 
 }
 
