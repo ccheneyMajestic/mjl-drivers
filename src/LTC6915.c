@@ -102,7 +102,9 @@ uint32_t ltc6915_start(LTC6915_S *const state) {
   uint32_t error = 0;
   if(!state->_init){error|=ERROR_INIT;}
   if(state->_running){error|=ERROR_RUNNING;}
-  if(!state->spi->_running){error|=ERROR_MODE;}
+  if(LTC6915_MODE_SERIAL == state->mode) {
+    if(!state->spi->_running){error|=ERROR_MODE;}
+  }
 
   if(!error){
     /* Pre-mark as running */
