@@ -3,12 +3,13 @@
 <!--This file is machine generated and read. It is not intended to be edited by hand.-->
 <!--Due to this, there is no schema for this file.-->
 <CyGuid_2867d519-54d2-4c01-9830-c51cb08bc3dd type_name="CyDesigner.Common.ProjMgmt.Model.CyPrjMgmtWorkspaceSerialize" version="5" xml_contents_version="3" name="Templates" persistent="Templates.cywrk" platform="NOT_USED">
-<current_project name=".\template_063.cydsn\template_063.cyprj" />
+<current_project name=".\template_4245.cydsn\template_4245.cyprj" />
 <wrkspc_folders />
 <files />
 <projects>
 <v>.\template_mjl_driver.cydsn\template_mjl_driver.cyprj</v>
 <v>.\template_063.cydsn\template_063.cyprj</v>
+<v>.\template_4245.cydsn\template_4245.cyprj</v>
 </projects>
 <workspace_id v="72bd8734-9b89-4acf-bea8-4371b6baac9d" />
 <WriteAppVersionLastSavedWith v="4.4.0.80" />
