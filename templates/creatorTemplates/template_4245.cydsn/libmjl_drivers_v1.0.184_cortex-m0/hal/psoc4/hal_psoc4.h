@@ -17,7 +17,7 @@
   /***************************************
   * Configurations
   ***************************************/
-  #define USE_SPI /* Comment this out to disable SPI */
+//  #define USE_SPI /* Comment this out to disable SPI */
 
   /***************************************
   * Included files
@@ -75,7 +75,6 @@
     void spi_disassertSlave(void);
   #endif /* USE_SPI */
 
-  void pin_oled_reset_write_dummy(uint8_t val);
 
     
 #endif /* HAL_PSOC4_H */

@@ -210,15 +210,3 @@ uint32_t uart_psoc4SCB_read(uint8_t *data){
     }
 #endif /* USE_SPI */
 
-/*******************************************************************************
-* Function Name: pin_oled_reset_write_dummy()
-********************************************************************************
-* \brief
-*   Stand in for controlling the reset pin,as it is tied to the AUX_EN pin 
-*
-* \return
-*  None
-*******************************************************************************/
-void pin_oled_reset_write_dummy(uint8_t val){
-    (void) val;
-}
