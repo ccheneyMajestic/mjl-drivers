@@ -1,19 +1,19 @@
 /***************************************************************************
-*                                       MICA
-* File: Sflash.h
-* Workspace: micaComponents
-* Project Name: libMica
+*                               Majestic Labs © 2024
+* File: Sflash.c
+* Workspace: libMjl
 * Version: v1.0
 * Author: Craig Cheney
 *
 * Brief:
-*   Header for interacting with the Supervisory flash
+*   API for interacting with the Supervisory flash
 * 
 * Authors:
 *   Craig Cheney
 *
 * Change Log:
 *   2018.03.03 CC - Document created
+*   2024.05.27 CC - Update from MICA to MJL
 ********************************************************************************/
 /* Header Guard */
 #ifndef SFLASH_H

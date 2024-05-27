@@ -1,8 +1,7 @@
-  /***************************************************************************
-*                                       MICA
+/***************************************************************************
+*                               Majestic Labs © 2024
 * File: Sflash.c
-* Workspace: micaCompnents
-* Project Name: libMica
+* Workspace: libMjl
 * Version: v1.0
 * Author: Craig Cheney
 *
@@ -14,13 +13,14 @@
 *
 * Change Log:
 *   2018.03.03 CC - Document created
+*   2024.05.27 CC - Update from MICA to MJL
 ********************************************************************************/
 #include "supervisorFlash_psoc4.h"
 
 
 /*******************************************************************************
 * Function Name: SFLASH_ReadRow()
-****************************************************************************//**
+********************************************************************************
 *
 * \brief Places the SFlash data of the specified row into the array passed in. 
     Array must be of length SFLASH_SIZE_ROW.
@@ -59,7 +59,7 @@ uint32 SFLASH_ReadRow(uint8 rowNum, uint8* dataBuffer){
 
 /*******************************************************************************
 * Function Name: SFLASH_WriteRow()
-****************************************************************************//**
+********************************************************************************
 *
 * \brief Copies the data in 'rowData' and writes it into the Supervisory Flash 
 *   (SFlash) section of code. Wrapper of the Cypress function CySysSFlashWriteUserRow().
@@ -88,7 +88,7 @@ uint32 SFLASH_WriteRow(uint8 rowNum, const uint8* rowData){
 
 /*******************************************************************************
 * Function Name: SFLASH_ReadLocalName()
-****************************************************************************//**
+********************************************************************************
 *
 * \brief Copies the name stored in SFLASH into the array passed in. 
 *
@@ -122,7 +122,7 @@ uint32 SFLASH_ReadLocalName(char* nameArray){
 
 /*******************************************************************************
 * Function Name: SFLASH_WriteLocalName()
-****************************************************************************//**
+********************************************************************************
 *
 * \brief Stores the name passed in into SFLASH.
 *
@@ -166,5 +166,5 @@ uint32 SFLASH_WriteLocalName(uint8 len, char* nameArray){
     /* Write the new Row to SFlash */
     return SFLASH_WriteRow(SFLASH_NAME_ROW, rowData);
 }
-  
+
 /* [] END OF FILE */
